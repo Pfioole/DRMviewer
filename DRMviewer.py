@@ -27,7 +27,7 @@ def createExceptionMarkup(df_exceptions, exceptionRecords):
         df_ex = df_exceptions.loc[df_exceptions['KEY1'] == i]
         markupDict[i] = {}
         listVARS = df_ex['VAR1CD'].unique().tolist() + df_ex['VAR2CD'].unique().tolist() + df_ex['VAR3CD'].unique().tolist() +df_ex['VAR4CD'].unique().tolist() +df_ex['VAR5CD'].unique().tolist()
-        listVARS = [x for x in listVARS if str(x) != 'nan']  #remove nan's from the list
+        listVARS = [x for x in listVARS if str(x) != 'nan']  # remove nan's from the list
         # print (listVARS)
         # set up the empty dictionary per DS line item and per variable
         for k in listVARS:
