@@ -1,0 +1,96 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8" />
+
+    <title>
+        Using Position Absolute Inside A Scrolling Overflow Container
+    </title>
+
+    <style type="text/css">
+        div.viewport {
+            border: 5px solid #CCCCCC ;
+            box-sizing: border-box ;
+            
+            overflow: auto ;
+            width: 95% ;
+			
+			padding: 5px 15px 5px 15px ;
+            /*
+                Here, the overflow container is, itself, acting as the anchor for the
+                positioned elements contained within. This caused the absolutely
+                positioned elements to anchor to the actual viewport of the container.
+            */
+            position: relative ;
+			
+        }
+		#balk {
+			height: 130px;
+        }
+    </style>
+	<script src="https://code.jquery.com/jquery-3.3.1.js"></script>
+</head>
+<body>
+	<div id="balk">
+		<h1>
+			Using Position Absolute Inside A Scrolling Overflow Container
+		</h1>
+
+		<h2>
+			With A Positioned Overflow Container
+		</h2>
+	</div>
+
+
+	<script>
+
+
+	$(document).ready(function() {
+		
+		var x = $("#sidebar").offset();
+		var bodyheight = parseInt($(window).height() - x.top -30);
+		$("#sidebar").height(bodyheight);
+		var afterheight = $("#sidebar").height();
+		alert("height on initial load: " + afterheight);
+			
+ 
+		   
+
+		   
+		$(window).resize(function() {
+			var x = $("#sidebar").offset();
+			var bodyheight = parseInt($(window).height() - x.top -30);
+			$("#sidebar").height(bodyheight);
+	  		var afterheight = $("#sidebar").height();
+
+		});   
+		   /*
+		   $(function(){
+			  resize_main_pane();
+			  $(window).resize(resize_main_pane);
+			});
+			
+			function resize_main_pane() {
+			  var offset = $('#main_scroller').offset(),
+			  remaining_height = parseInt($(window).height() - offset.top - 50);
+			  $('#main_scroller').height(remaining_height);
+			}
+		   */		
+	});
+	
+	
+	</script>
+	
+    <div id="sidebar" class="viewport">
+
+        <p>Yay, content!</p><p>Yay, content!</p><p>Yay, content!</p><p>Yay, content!</p>
+        <p>Yay, content!</p><p>Yay, content!</p><p>Yay, content!</p><p>Yay, content!</p>
+        <p>Yay, content!</p><p>Yay, content!</p><p>Yay, content!</p><p>Yay, content!</p>
+        <p>Yay, content!</p><p>Yay, content!</p><p>Yay, content!</p><p>Yay, content!</p>
+
+    </div>
+
+   
+
+</body>
+</html>

@@ -1,0 +1,23 @@
+{% extends 'base2.html' %}
+
+{% block body %}
+
+<script type="text/javascript" src="{{ url_for('static', filename='./js/DRMviewer.js')}}"></script>
+
+<script>
+
+
+
+/*$(document).ready(function() {
+
+		$("#paragraph3").append('{{ the_ae3_html|safe }}')
+});
+
+*/	
+	
+</script>
+
+<div id="paragraph3">{{ the_ds_html|safe }}</div>
+
+	
+{% endblock %}

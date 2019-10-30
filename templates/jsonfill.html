@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Dynamic Table</title>
+    <script  src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <style>
+button{
+    border-radius: 10px;
+    height: 45px;
+    width: 150px;
+    text-align: center;
+    background-color: #5499C7;
+    font-size: 15px;
+    color: #ffffff;
+    }
+  input{
+    height: 35px;
+    font-size: 15px;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+th, td {
+    text-align: center;
+    padding: 15px;
+    font-size: 20px;
+}
+th {
+    background-color: #5499C7;
+    color: white;
+    font-style: bold;
+    font-size: 35px;
+}
+</style>
+    <script >
+//JSON Object................
+      var json_obj  = {
+          "name":"John",
+          "age":30,
+          "cars": [
+        { "name":"Ford", "models":[ "Fiesta", "Focus", "Mustang" ] },
+        { "name":"BMW", "models":[ "320", "X3", "X5" ] },
+        { "name":"Fiat", "models":[ "500", "Panda","550" ] }
+    ]
+ }
+//JSON Object End................
+//Create table and fetch data from JSON Object.
+        $(document).ready(function(){
+            $("button").click(function(){
+              var number_of_rows = json_obj.cars.length;
+              var k = 0;
+              var table_body = '<table border="1" id="example"><thead><tr><th>Cars</th><th>Models</th></tr></thead><tbody>';
+              for(j in json_obj.cars){
+              for(i =0;i<json_obj.cars.length;i++){
+                    table_body+='<tr>';
+                    table_body +='<td>';
+                    table_body +=json_obj.cars[k]["name"];
+                    table_body +='</td>';
+                   
+                    table_body +='<td>';
+                    table_body +=json_obj.cars[k].models[i];
+                    table_body +='</td>';
+                
+                    table_body+='</tr>';
+              }
+              k++;
+            }
+                table_body+='</tbody></table>';
+               $('#tableDiv').html(table_body);
+              //display data..........
+            });
+// for search function.................................. only............................
+        $("#search").on("keyup", function() {
+        var value = $(this).val().toLowerCase();
+        $("table tr").filter(function(index) {
+          if(index>0){
+      $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+    }
+    });
+});
+//=================End=========================End===============================
+        });
+</script>
+</head>
+<body>
+<div style="margin-top: 50px; margin-left: 250px; margin-right: 250px;">
+    <button>Create Table</button>
+<input type="text" id="search" placeholder="Search data here....."></input>
+    <div id="tableDiv" style="margin-top: 40px">
+        Table will gentare here.
+    </div>
+</div>
+<p id="p1"></p>
+</body>
+</html>

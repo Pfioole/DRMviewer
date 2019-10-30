@@ -1,0 +1,103 @@
+{% extends "base4.html" %}
+
+{% block styles %}
+	{{ super() }}
+	
+	<style type="text/css">
+		.tableFixHead  { 
+			overflow-y: auto; 
+			height: 800px; 
+		}
+		.tableFixHead thead th { position: sticky; top: 0; }
+
+		/* Just common table stuff. Really. */
+		table  { border-collapse: collapse; width: 100%; }
+		th, td { padding: 8px 16px; }
+		th     { background:#eee; }		
+
+.clearfix:before,.clearfix:after {
+    content: " ";display: table; /* 2 */}
+.clearfix:after {clear: both;}
+.clearfix {*zoom: 1;}
+
+.options {margin-bottom: 8px;}
+
+/* Style checkboxes as Toggle Buttons */
+.ck-button {
+    margin:2px;
+    background-color:#EFEFEF;
+    border-radius:4px;
+    border:1px solid #aaa;
+    overflow:auto;
+    float:left;
+    color:#aaa;
+}
+.ck-button:hover {
+    background-color:#ddd;
+}
+.ck-button label {
+    float:left;
+    width:auto;
+    margin-bottom: 0;
+}
+.ck-button label span {
+    text-align:center;
+    padding:0px 2px;
+    display:block;
+}
+.ck-button label input {
+    position:absolute;
+    top:-20px;
+}
+.ck-button input:checked + span {
+    color:#111;
+}
+
+		</style>
+	
+	
+{% endblock %}
+
+{% block title %}Bootstraptest{% endblock %}
+
+{% block page_content %}
+  
+<div class="container-fluid" >
+		<div class="page-header">
+			<h2>{{ the_domain }}</h2> {{ the_filefolder }}
+		</div>
+</div>	
+ 
+<div class="options clearfix">
+	<div class="ck-button"><label><input type="checkbox" value="1" name="Rec" checked="checked">
+	<span>Rec</span></label></div>
+	{% for column in the_columnlist %}
+		<div class="ck-button"><label><input type="checkbox" value="1" name="{{ column }}" checked="checked">
+		<span>{{ column }}</span></label></div>
+	{% endfor %}
+</div>
+
+
+<!-- END TOGGLE Columns -->
+
+<div class="container">
+  Colselect : {{ the_colselect }}
+  DictJSON = {{ the_dictJSON }}
+</div>
+
+<div class="container">
+  <input class="form-control" id="ds_filter" type="text" placeholder="Search..">
+</div>
+
+
+<div id="tableHolder" class="tableview container-fluid tableFixHead">
+	{{ the_ds_html|safe }}
+</div>
+
+
+{% endblock %}
+
+{% block scripts %}
+	{{ super() }}
+	<script type="text/javascript" src="{{ url_for('static', filename='./js/DRMviewer.js')}}"></script>
+{% endblock %}

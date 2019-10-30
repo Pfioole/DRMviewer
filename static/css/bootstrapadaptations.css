@@ -1,0 +1,22 @@
+.tableview {
+	border: 1px solid #CCCCCC ;
+	box-sizing: border-box ;
+	
+	overflow: auto ;
+
+	
+	padding: 5px 15px 5px 15px ;
+	/*
+		Here, the overflow container is, itself, acting as the anchor for the
+		positioned elements contained within. This caused the absolutely
+		positioned elements to anchor to the actual viewport of the container.
+	*/
+	position: relative ;
+}
+
+#example {
+	
+}
+
+
+

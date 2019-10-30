@@ -1,0 +1,35 @@
+{% extends 'base4.html' %}
+
+{% block page_content %}
+
+<div class="container-fluid">
+	<h2>{{ the_title }}</h2>  {{ the_folder }}
+</div>
+
+<form method="POST" action="/dsviewer">
+	<div class="container">
+		<input type="hidden" id="folderId" name="folder" value="{{ the_folder }}">
+		<strong>Files:</strong></br>
+		{% for filename in the_filelist %}
+			<input class="form-check-input" type="radio" name="fileselected" id="CHECK{{ filename }}"value="{{ filename }}">
+			<label class="form-check-label" for="CHECK{{ filename }}">
+			{{ filename }}</br>
+		{% endfor %}
+	</div>
+	<div class="container">
+		Exception file: <input class="form-control" name="exceptionfile" type="TEXT" width="150" value="{{ the_exceptionfile }}">
+	</div>
+	<div class="container">
+		<button class="btn btn-primary" type="SUBMIT">view dataset</button>
+	</div>
+</form>
+
+
+	
+
+	
+	
+
+
+
+{% endblock %}

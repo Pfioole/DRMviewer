@@ -1,0 +1,69 @@
+{% extends 'base4.html' %}
+
+{% block page_content %}
+
+<div class="container-fluid">
+	<h2>{{ the_title }}</h2>  {{ the_folder }}
+</div>
+
+<form method="POST" action="/combinedview">
+	<div class="container">
+	</div>
+	
+	<div class="container">
+
+		<div class="row">
+			<div class="col-sm">
+			
+				<input type="hidden" id="folderId" name="folder" value="{{ the_folder }}">
+
+				<strong>Select left file to merge:</strong></br>
+				<input list="file1selected" name="file1selected">
+					<datalist id="file1selected">
+						{% for filename in the_filelist %}
+							<option value="{{ filename }}">
+						{% endfor %}
+					</datalist>
+			</div>
+			<div class="col-sm">
+			
+				<strong>Select right file to merge:</strong></br>
+				<input list="file2selected" name="file2selected">
+					<datalist id="file2selected">
+						{% for filename in the_filelist %}
+							<option value="{{ filename }}">
+						{% endfor %}
+					</datalist>
+				
+			</div>
+			<div class="col-sm">
+
+				<strong>for future use:</strong></br>
+				<input list="file3selected" name="file3selected">
+					<datalist id="file3selected">
+						{% for filename in the_filelist %}
+							<option value="{{ filename }}">
+						{% endfor %}
+					</datalist>
+
+			</div>
+		</div>
+	</div>
+	
+	<div class="container">
+		Exception file: <input class="form-control" name="exceptionfile" type="TEXT" width="150" value="{{ the_exceptionfile }}">
+	</div>
+	<div class="container">
+		<button class="btn btn-primary" type="SUBMIT">select linking</button>
+	</div>
+</form>
+
+
+	
+
+	
+	
+
+
+
+{% endblock %}

@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+
+<script type="text/javascript" >
+	array AE_columns = '{{ the_ae_cols }};
+	document.write(AE_columns);
+	var AE_json = '{{ the_ae_json }}' ;
+	document.write("<h2>AE JSON to Javacscript object from DRMViewer.py viewlog</h2>");
+	document.write(AE_json);
+	document.write("<p>");
+	var AE_html = '{{ the_html_ae }}';
+	document.write("<h2>AE HTML as received from DRMviewer.py</h2>");
+	document.write(AE_html);	
+</script>
+
+<script type="text/javascript" src="{{ url_for('static', filename='./js/DRMviewer.js')}}"></script>
+
+<h2>{{ the_title }}</h2>
+
+<h2>example 3 table for autofill up</h2>
+
+<p id="example3"></p>
+
+<script>
+$(document).ready(function() {
+	$("button").click(function () {
+		$("#example3").append(AE_html);
+	});
+});
+
+
+</script>
+
+
+
+<h2>autofill up table example7 with flask loops</h2>
+
+<table id=example7>
+	<tr>
+		{% for row_title in the_row_titles %}
+			<th>{{row_title}}</th>
+		{% endfor %}
+	</tr>
+	{% for log_row in the_data %}
+		<tr>
+			{% for item in log_row %}
+				<td>{{item}}</td>
+			{% endfor %}
+		</tr>
+	{% endfor %}
+</table>
+
+<table><tr><td>Library</td><td>Epoch</td><td>Start of Epoch</td><td>End of Epoch</td></tr>
+	<script>
+	for (i=0; i< epochs.length; i++) {
+		document.write("<tr>")
+		document.write("<td>" + epochs[i].Library + "</td>");
+		document.write("<td>" + epochs[i].Epoch + "</td>");
+		document.write("<td>" + epochs[i].Start_of_Epoch + "</td>");
+		document.write("<td>" + epochs[i].End_of_Epoch + "</td>");	
+		document.write("</tr>")	
+	}
+	</script>
+</table>
+
+<h2>Rows only table</h2>
+
+<p></p>
+<table id="example5" class="display">
+	<th>
+		{% for row_title in the_ae_cols %}
+			<th>{{row_title}}</th>
+		{% endfor %}
+	</th>
+
+
+</table>
+
+<h2>HTML dump from Python</h2>
+
+<p>{{ the_html_ae }}</p>
+
+<h2>Columns dump</h2>
+
+<p>{{ the_ae_cols }}</p>
+
+
+
+
+
+<table id="example" class="display" style="width:100%">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Office</th>
+                <th>Age</th>
+                <th>Start date</th>
+                <th>Salary</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Tiger Nixon</td>
+                <td>System Architect</td>
+                <td>Edinburgh</td>
+                <td>61</td>
+                <td>2011/04/25</td>
+                <td>$320,800</td>
+            </tr>
+            <tr>
+                <td>Garrett Winters</td>
+                <td>Accountant</td>
+                <td>Tokyo</td>
+                <td>63</td>
+                <td>2011/07/25</td>
+                <td>$170,750</td>
+            </tr>
+        </tbody>
+        <tfoot>
+            <tr>
+                <th>Name</th>
+                <th>Position</th>
+                <th>Office</th>
+                <th>Age</th>
+                <th>Start date</th>
+                <th>Salary</th>
+            </tr>
+        </tfoot>
+    </table>
+
+
+	
+{% endblock %}

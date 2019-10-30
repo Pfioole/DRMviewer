@@ -1,0 +1,23 @@
+{% extends 'base4.html' %}
+
+
+
+{% block page_content %}
+
+<div class="container-fluid">
+	<h2>{{ the_title }}</h2>
+	<p>Select location of your study files:</p>
+</div>
+
+<form method="POST" action="/selectfile">
+
+<div class="container">
+	Path: <input class="form-control" name="path" type="TEXT" width="150" value="{{ the_path }}">
+</div>
+<div class="container">
+	<button class="btn btn-primary" type="SUBMIT">view datasets</button>
+</div>
+
+</form>
+
+{% endblock %}

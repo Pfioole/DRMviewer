@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block body %}
+
+<script type="text/javascript" src="{{ url_for('static', filename='./js/DRMviewer.js')}}"></script>
+
+<script>
+
+
+
+$(document).ready(function() {
+
+		$("#paragraph1").append('{{ the_ae2_html }}');
+		$("#paragraph3").append('{{ the_ae3_html }}');	
+});
+
+	
+	
+</script>
+
+
+	{% for table in tables %}
+				{{titles[loop.index]}}
+				{{ table|safe }}
+	{% endfor %}
+
+<p id="paragraph1">'{{ the_ae2_html|safe }}'</p>
+	
+<p id="paragraph3">'{{ the_ae3_html|safe }}'</p>
+	
+{% endblock %}
