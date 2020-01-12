@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, escape, Markup, session
+from flask import Flask, render_template, request, escape, Markup, session, jsonify
 # from flask_bootstrap import Bootstrap
 import pandas as pd
 from pathlib import Path
@@ -117,10 +117,52 @@ def entry_page() -> 'html':
     return render_template('entry.html',
                            the_title='DRM viewer', the_path=path)
 
-         
+@app.route('/singlepage')
+def singlepage() -> 'html':
+    path = "C:/CDR/3945/56021927PCR1024/DRMdata/"
+    return render_template('singlepage.html',
+                           the_title='DRM viewer', the_path=path)
+
+@app.route('/fetchdatasets', methods=['GET'])
+def fetchdatasets():
+    studyPath = request.args.get('studyPath')
+    datafolder = studyPath
+    session['datafolder'] = studyPath
+    datapath = Path(datafolder)
+
+    exceptionfile = ""
+    if datafolder == "C:/CDR/IDP0000/STUDY001/DRMdata/":
+        exceptionfile = "C:\CDR\IDP0000\STUDY001\Reports\exceptions.csv"
+
+    filelist = os.listdir(datapath)
+    saslist = []
+    for filename in filelist:
+        if '.sas7bdat' in filename:
+            saslist.append(filename)
+    # log_request(request, results)
+    saslistDict = {}
+    saslistDict["datasetsList"] = saslist
+    return jsonify(saslistDict)
+
+
+@app.route('/fetchfields', methods=['GET'])
+def fetchfields():
+    studyPath = request.args.get('studyPath')
+    selectedFile = request.args.get('selectedFile')
+    if (studyPath[-1:] not in ["/", "\\"]):
+        studyPath = studyPath + "/"
+    filefolder = studyPath + selectedFile
+    filePath = Path(filefolder)
+    df_ds = pd.read_sas(filePath, format='sas7bdat', encoding = 'iso-8859-1')
+    npcols = df_ds.columns.values
+    cols = npcols.tolist()
+    fieldlistDict = {}
+    fieldlistDict["fieldList"] = cols
+    return jsonify(fieldlistDict)
+
+
 @app.route('/selectfile', methods=['POST'])
 def fileselect_page() -> 'html':
-    
     datafolder = request.form['path']
     session['datafolder'] = request.form['path']
     datapath = Path(datafolder)
