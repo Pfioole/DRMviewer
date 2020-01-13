@@ -39,19 +39,17 @@
             <strong>Select right file to merge:</strong></br>
             <select data-bind="options: datasetsList, value: rightFile, event:{change: fetchRightFields}" class="form-control" ></select>
             <label for="rightcolselect">Select right fields:</label>
-			<select data-bind="options: rightFieldList" multiple="multiple" id="rightcolselect" class="form-control" name="rightcolselect" size=20></select>
+			<select data-bind="options: rightFieldList, value: rightField, event:{change: addRightFieldSelect}" id="rightcolselect" class="form-control" name="rightcolselect" size=20></select>
         </div>
     </div>
 </div>
 
 <div class="container">
-    select <input class="form-control"  data-bind="value: rightFieldList" width="150" />
+    select <input class="form-control"  data-bind="value: selectedFields" width="150" /><span class="glyphicon glyphicon-remove"></span>
 </div>
 <div class="container">
-    from <input class="form-control"  data-bind="value: leftFile" width="150" />
-</div>
-<div class="container">
-    inner join  <input class="form-control"  data-bind="value: rightFile" width="150" />
+    from <span class="h6"  data-bind="text: leftFile"></span>
+    inner join  <span class="h6" data-bind="text: rightFile"> </span>
 </div>
 <div class="container">
    on <input class="form-control"  data-bind="value: rightFieldList" width="150" />
