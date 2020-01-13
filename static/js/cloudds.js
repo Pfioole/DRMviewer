@@ -29,6 +29,8 @@ function SinglepageViewModel() {
     self.rightFile = ko.observable();
     self.leftFieldList = ko.observable();
     self.rightFieldList = ko.observable();
+    self.rightField = ko.observable();
+    self.selectedFields = ko.observableArray();
  /*
     self.tasks = ko.observableArray([]);
     self.newTaskText = ko.observable();
@@ -67,7 +69,7 @@ function SinglepageViewModel() {
         });
     }
 
-        self.fetchRightFields = function() {
+    self.fetchRightFields = function() {
         $.getJSON("/fetchfields", {
             studyPath: self.studypathText(),
             selectedFile: self.rightFile(),
@@ -75,6 +77,7 @@ function SinglepageViewModel() {
             lijst = result.fieldList;
             self.rightFieldList(lijst);
             self.links.removeAll();
+            self.selectedFields.removeAll();
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
@@ -85,6 +88,11 @@ function SinglepageViewModel() {
         self.links.push(new Link("", ""));
         //alert("array: " + self.links()[0].toString());
     };
+
+    self.addRightFieldSelect = function() {
+        alert("selected: " + self.rightField());
+        self.selectedFields.push(self.rightField());
+    }
 
     self.removeLink = function(link) {self.links.remove(link)}
 
