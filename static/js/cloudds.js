@@ -90,11 +90,15 @@ function SinglepageViewModel() {
     };
 
     self.addRightFieldSelect = function() {
-        alert("selected: " + self.rightField());
+        //alert("selected: " + self.rightField());
         self.selectedFields.push(self.rightField());
     }
 
     self.removeLink = function(link) {self.links.remove(link)}
+
+    self.removeSelectField = function() {
+        if (self.selectedFields.length > 0) { self.SelectedFields = self.SelectedFields().pop();}
+    }
 
     self.removeAllLinks = function() {
 
