@@ -138,6 +138,7 @@ def fetchdatasets():
     saslist = []
     for filename in filelist:
         if '.sas7bdat' in filename:
+            # domain = os.path.splitext(filename)[0].upper()
             saslist.append(filename)
     # log_request(request, results)
     saslistDict = {}

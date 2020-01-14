@@ -4,7 +4,7 @@
 
 <div class="container">
     Select dataset Path: <input class="form-control" value="{{ the_path }}" data-bind="value: studypathText" width="80" />
-    <button class="btn btn-primary" data-bind="click: fetchDatasets">view datasets new style</button>
+    <button class="btn btn-primary" data-bind="click: fetchDatasets">view datasets</button>
 </div>
 
 <div class="container">
@@ -25,7 +25,7 @@
         <div class="col-sm">
             <strong>Join linking:</strong></br>
             <table class="table table-sm ">
-                <th>Left</th><th>Right</th>
+                <th>Left</th><th>Right</th><th></th>
                 <tbody data-bind="foreach: links">
                     <td><select data-bind="options: $root.leftFieldList, value: leftLink" class="form-control"></select></td>
                     <td><select data-bind="options: $root.rightFieldList, value: rightLink" class="form-control"></td>
@@ -45,14 +45,16 @@
 </div>
 
 <div class="container">
-    select <input class="form-control"  data-bind="value: selectedFields" /> <a href="#" data-bind="click: $root.removeSelectField">X</a>
+    SELECT <span data-bind="text: selectedFields" class="h6"></span> <a href="#" data-bind="click: $root.removeSelectField">X</a>
 </div>
 <div class="container">
     from <span class="h6"  data-bind="text: leftFile"></span>
     inner join  <span class="h6" data-bind="text: rightFile"> </span>
 </div>
 <div class="container">
-   on <input class="form-control"  data-bind="value: rightFieldList" width="150" />
+    <span data-bind="foreach: links">
+        ON (<span data-bind="text: leftLink"></span> = <span data-bind="text: rightLink"></span>)</span></br>
+     </span>
 </div>
 
 {% endblock %}
