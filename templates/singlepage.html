@@ -8,10 +8,6 @@
 </div>
 
 <div class="container">
-    Right Fields: <input class="form-control"  data-bind="value: rightFieldList" width="150" />
-</div>
-
-<div class="container">
     <div class="row">
         <div class="col-sm">
             <strong>Select left file to merge:</strong></br>
@@ -55,6 +51,10 @@
     <span data-bind="foreach: links">
         ON (<span data-bind="text: leftLink"></span> = <span data-bind="text: rightLink"></span>)</span></br>
      </span>
+</div>
+
+<div class="container">
+    WHERE <input class="form-control" data-bind="whereClause" />
 </div>
 
 {% endblock %}
