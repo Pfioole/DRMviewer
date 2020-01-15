@@ -31,6 +31,7 @@ function SinglepageViewModel() {
     self.rightFieldList = ko.observable();
     self.rightField = ko.observable();
     self.selectedFields = ko.observableArray();
+    self.whereClause = ko.observable();
  /*
     self.tasks = ko.observableArray([]);
     self.newTaskText = ko.observable();
@@ -97,7 +98,7 @@ function SinglepageViewModel() {
     self.removeLink = function(link) {self.links.remove(link)}
 
     self.removeSelectField = function() {
-        if (self.selectedFields.length > 0) { self.SelectedFields = self.SelectedFields().pop();}
+        { self.selectedFields.pop();}
     }
 
     self.removeAllLinks = function() {
