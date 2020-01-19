@@ -3,8 +3,22 @@
 {% block page_content %}
 
 <div class="container">
-    Select dataset Path: <input class="form-control" value="{{ the_path }}" data-bind="value: studypathText" width="80" />
-    <button class="btn btn-primary" data-bind="click: fetchDatasets">view datasets</button>
+    <div class="row"><div class="col">Study Dataset Path: </div></div>
+    <div class="row">
+      <div class="col-9"><input class="form-control" value="{{ the_path }}" data-bind="value: studypathText"/></div>
+      <div class="col"><button class="btn btn-primary" data-bind="click: fetchDatasets">Select</button></div>
+    </div>
+</div>
+
+<div class="container">
+    <ul class="nav nav-pills nav-justified">
+      <li class="nav-item">
+        <a class="nav-link active" href="#">Create Query</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">Re-use query</a>
+      </li>
+    </ul>
 </div>
 
 <div class="container">
@@ -14,8 +28,7 @@
             <select data-bind="options: datasetsList, value: leftFile, event:{change: fetchFields}" class="form-control" ></select>
 
             <label for="colselect">Select Left fields:</label>
-			<select data-bind="options: leftFieldList" multiple="multiple" id="colselectX" class="form-control" name="colselectX" size=20>
-			</select>
+			<select data-bind="options: leftFieldList, value: leftField, event:{change: addLeftFieldSelect}" id="leftcolselect" class="form-control" name="leftcolselect" size="10"></select>
         </div>
 
         <div class="col-sm">
@@ -35,7 +48,7 @@
             <strong>Select right file to merge:</strong></br>
             <select data-bind="options: datasetsList, value: rightFile, event:{change: fetchRightFields}" class="form-control" ></select>
             <label for="rightcolselect">Select right fields:</label>
-			<select data-bind="options: rightFieldList, value: rightField, event:{change: addRightFieldSelect}" id="rightcolselect" class="form-control" name="rightcolselect" size=20></select>
+			<select data-bind="options: rightFieldList, value: rightField, event:{change: addRightFieldSelect}" id="rightcolselect" class="form-control" name="rightcolselect" size="10"></select>
         </div>
     </div>
 </div>
@@ -56,6 +69,39 @@
 <div class="container">
     WHERE <input class="form-control" data-bind="whereClause" />
 </div>
+
+
+
+<div class="container">
+    <div class="row">
+        <button class="btn btn-primary" data-bind="click: runQuery">Run query</button>
+        <button class="btn btn-primary" data-bind="click: saveQuery">Save query</button>
+    </div>
+</div>
+
+<!-- Modal to show the save pop-up -->
+
+<div id= "saveModal" class="modal fade modal-lg" tabindex="-1" role="dialog">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Save query to the server</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <p>SQL query:</p>
+        <p><span data-bind="text: SQLquery"></span></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary">Save query</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 
 {% endblock %}
 

@@ -138,8 +138,8 @@ def fetchdatasets():
     saslist = []
     for filename in filelist:
         if '.sas7bdat' in filename:
-            # domain = os.path.splitext(filename)[0].upper()
-            saslist.append(filename)
+            domain = os.path.splitext(filename)[0].upper()
+            saslist.append(domain)
     # log_request(request, results)
     saslistDict = {}
     saslistDict["datasetsList"] = saslist
@@ -149,7 +149,7 @@ def fetchdatasets():
 @app.route('/fetchfields', methods=['GET'])
 def fetchfields():
     studyPath = request.args.get('studyPath')
-    selectedFile = request.args.get('selectedFile')
+    selectedFile = request.args.get('selectedDomain') + ".sas7Bdat"
     if (studyPath[-1:] not in ["/", "\\"]):
         studyPath = studyPath + "/"
     filefolder = studyPath + selectedFile
