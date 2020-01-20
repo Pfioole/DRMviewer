@@ -1,16 +1,4 @@
-/*
-function Task(data) {
-    this.title = ko.observable(data.title);
-    this.isDone = ko.observable(data.isDone);
-}
-*/
 
-/*
-function Study(data) {
-    this.studypath = ko.observable(data.studypath);
-    this.datasetsList = ko.observable(data.datasetsList);
-}
-*/
 
 function Link(leftLink, rightLink) {
     var self = this;
@@ -18,11 +6,19 @@ function Link(leftLink, rightLink) {
     self.rightLink = ko.observable("");
 }
 
+function Sort(sortField, sortDirection) {
+    var self = this;
+    self.sortField = ko.observable("");
+    self.sortDirection = ko.observable("");
+}
+
+
 function StudyQuery(SQLquery, domainList, SQLfieldList) {
     var self = this;
     self.SQLquery = ko.observable("");
     self.domainList = [];
     self.SQLfieldList = ko.observableArray();
+    self.sortFields = ko.observableArray();
 }
 
 
@@ -39,18 +35,13 @@ function SinglepageViewModel() {
     self.leftField = ko.observable();
     self.rightField = ko.observable();
     self.selectedFields = ko.observableArray();
-    self.whereClause = ko.observable();
+    self.sortDirections = ["ASC", "DESC"];
+    self.whereClause = ko.observable("");
     self.SQLquery = ko.observable();
     self.links = ko.observableArray([]);
-
- /*
-    self.tasks = ko.observableArray([]);
-    self.newTaskText = ko.observable();
-    self.incompleteTasks = ko.computed(function() {
-        return ko.utils.arrayFilter(self.tasks(), function(task) { return !task.isDone() });
-    });
-
- */
+    self.sorts = ko.observableArray([]);
+//    self.sortField = ko.observable();
+//    self.sortFields = ko.observableArray([]);
 
 
     // Operations
@@ -101,6 +92,12 @@ function SinglepageViewModel() {
         //alert("array: " + self.links()[0].toString());
     };
 
+    self.addSort = function() {
+        self.sorts.push(new Sort("", ""));
+        //alert("array: " + self.links()[0].toString());
+    };
+
+
     self.addLeftFieldSelect = function() {
         //alert("selected: " + self.rightField());
         insert = self.leftFile() + "." + self.leftField();
@@ -131,12 +128,31 @@ function SinglepageViewModel() {
         } else {
             joinText ="";
         }
-        SQLquery = "SELECT " + self.selectedFields() + " FROM " + self.leftFile() + joinText + ";";
+        orderLength =  self.sorts().length;
+        orderText ="";
+        if (orderLength > 0) {
+            orderText += " ORDER BY " + self.sorts()[0].sortField() + " " + self.sorts()[0].sortDirection();
+            if (orderLength > 1) {
+                for (i = 1; i < orderLength; i++) {
+                    orderText += ", " + self.sorts()[i].sortField() + " " + self.sorts()[i].sortDirection();
+                }
+            }
+        }
+        if (self.whereClause().length > 0) {
+            whereSQL = " WHERE " + self.whereClause();
+        } else {
+            whereSQL = "";
+        }
+
+
+        SQLquery = "SELECT " + self.selectedFields() + " FROM " + self.leftFile() + joinText + orderText + whereSQL + ";";
         self.SQLquery(SQLquery);
         $('#saveModal').modal('toggle');
     }
 
     self.removeLink = function(link) {self.links.remove(link)}
+
+    self.removeSort = function(sort) {self.sorts.remove(sort)}
 
     self.removeSelectField = function() {
         { self.selectedFields.pop();}

@@ -8,10 +8,10 @@
       <div class="col-9"><input class="form-control" value="{{ the_path }}" data-bind="value: studypathText"/></div>
       <div class="col"><button class="btn btn-primary" data-bind="click: fetchDatasets">Select</button></div>
     </div>
-</div>
+</div></br>
 
 <div class="container">
-    <ul class="nav nav-pills nav-justified">
+    <ul class="nav nav-tabs nav-justified">
       <li class="nav-item">
         <a class="nav-link active" href="#">Create Query</a>
       </li>
@@ -32,16 +32,27 @@
         </div>
 
         <div class="col-sm">
-            <strong>Join linking:</strong></br>
+            <strong>Join:</strong></br>
             <table class="table table-sm ">
-                <th>Left</th><th>Right</th><th></th>
+                <th>Left</th><th>Right</th><th>X</th>
                 <tbody data-bind="foreach: links">
                     <td><select data-bind="options: $root.leftFieldList, value: leftLink" class="form-control"></select></td>
                     <td><select data-bind="options: $root.rightFieldList, value: rightLink" class="form-control"></td>
                     <td><a href="#" data-bind="click: $root.removeLink">X</a></td>
                 </tbody>
             </table>
-            <button data-bind="click: addLink">Add Link</button>
+            <button data-bind="click: addLink">Add Link</button></br></br>
+
+            <strong>order by:</strong></br>
+            <table class="table table-sm ">
+                <th>Field</th><th>Asc/Desc</th><th>X</th>
+                <tbody data-bind="foreach: sorts">
+                    <td><select data-bind="options: $root.selectedFields, value: sortField" class="form-control"></select></td>
+                    <td><select data-bind="options: $root.sortDirections, value: sortDirection" class="form-control"></select></td>
+                    <td><a href="#" data-bind="click: $root.removeSort">X</a></td>
+                </tbody>
+            </table>
+            <button data-bind="click: addSort">Add Sorting</button></br>
         </div>
 
         <div class="col-sm">
@@ -70,13 +81,11 @@
     WHERE <input class="form-control" data-bind="whereClause" />
 </div>
 
-
-
 <div class="container">
-    <div class="row">
+
         <button class="btn btn-primary" data-bind="click: runQuery">Run query</button>
         <button class="btn btn-primary" data-bind="click: saveQuery">Save query</button>
-    </div>
+
 </div>
 
 <!-- Modal to show the save pop-up -->
