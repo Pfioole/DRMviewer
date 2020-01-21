@@ -116,7 +116,6 @@ function SinglepageViewModel() {
 
     self.saveQuery = function() {
         linksLength =  self.links().length;
-        alert("linksLength: " + linksLength);
         if (linksLength > 0) {
             joinText = " INNER JOIN " + self.rightFile() + " ON (" + self.links()[0].leftLink() + " = " + self.links()[0].rightLink();
             if (linksLength > 1) {
@@ -141,11 +140,13 @@ function SinglepageViewModel() {
         if (self.whereClause().length > 0) {
             whereSQL = " WHERE " + self.whereClause();
         } else {
-            whereSQL = "";
+            whereSQL = "kkk";
         }
 
+        var selection = self.selectedFields();
+        //selection = selection.replace(/,/g, ", ");
 
-        SQLquery = "SELECT " + self.selectedFields() + " FROM " + self.leftFile() + joinText + orderText + whereSQL + ";";
+        SQLquery = "SELECT " + selection + " FROM " + self.leftFile() + joinText + orderText + whereSQL + ";";
         self.SQLquery(SQLquery);
         $('#saveModal').modal('toggle');
     }
