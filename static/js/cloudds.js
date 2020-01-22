@@ -59,14 +59,19 @@ function SinglepageViewModel() {
         });
     }
 
-    self.fetchFields = function() {
+    self.fetchLeftFields = function() {
         $.getJSON("/fetchfields", {
             studyPath: self.studypathText(),
             selectedDomain: self.leftFile(),
         }).done(function (result, status, xhr) {
             lijst = result.fieldList;
+            for (i=0; i < lijst.length; i++) {
+                lijst[i] = self.leftFile() + "." + lijst[i];
+            }
             self.leftFieldList(lijst);
             self.links.removeAll();
+            self.sorts.removeAll();
+            self.selectedFields.removeAll();
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
@@ -78,8 +83,12 @@ function SinglepageViewModel() {
             selectedDomain: self.rightFile(),
         }).done(function (result, status, xhr) {
             lijst = result.fieldList;
+            for (i=0; i < lijst.length; i++) {
+                lijst[i] = self.rightFile() + "." + lijst[i];
+            }
             self.rightFieldList(lijst);
             self.links.removeAll();
+            self.sorts.removeAll();
             self.selectedFields.removeAll();
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
@@ -100,14 +109,14 @@ function SinglepageViewModel() {
 
     self.addLeftFieldSelect = function() {
         //alert("selected: " + self.rightField());
-        insert = self.leftFile() + "." + self.leftField();
-        self.selectedFields.push(insert);
+        //insert = self.leftFile() + "." + self.leftField();
+        self.selectedFields.push(self.leftField());
     }
 
     self.addRightFieldSelect = function() {
         //alert("selected: " + self.rightField());
-        insert = self.rightFile() + "." + self.rightField();
-        self.selectedFields.push(insert);
+        //insert = self.rightFile() + "." + self.rightField();
+        self.selectedFields.push(self.rightField());
     }
 
     self.runQuery = function() {
@@ -137,14 +146,15 @@ function SinglepageViewModel() {
                 }
             }
         }
-        if (self.whereClause().length > 0) {
+        if (self.whereClause() != "") {
             whereSQL = " WHERE " + self.whereClause();
         } else {
-            whereSQL = "kkk";
+            whereSQL = "";
         }
 
-        var selection = self.selectedFields();
-        //selection = selection.replace(/,/g, ", ");
+        selection = self.selectedFields().toString();
+        selection = selection.replace(/,/g, "\, ");
+        //,str.replace(/blue/g, "red");
 
         SQLquery = "SELECT " + selection + " FROM " + self.leftFile() + joinText + orderText + whereSQL + ";";
         self.SQLquery(SQLquery);
