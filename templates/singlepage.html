@@ -34,10 +34,11 @@
         <div class="col-sm">
             <strong>Join:</strong></br>
             <table class="table table-sm ">
-                <th>Left</th><th>Right</th><th>X</th>
+                <th>Type</th><th>Left</th><th>Right</th><th>X</th>
                 <tbody data-bind="foreach: links">
-                    <td><select data-bind="options: $root.leftFieldList, value: leftLink" class="form-control"></select></td>
-                    <td><select data-bind="options: $root.rightFieldList, value: rightLink" class="form-control"></td>
+                    <td><select data-bind="options: $root.joinTypes, value: joinType" class="form-control-sm"></select></td>
+                    <td><select data-bind="options: $root.leftFieldList, value: leftLink" class="form-control-sm"></select></td>
+                    <td><select data-bind="options: $root.rightFieldList, value: rightLink" class="form-control-sm"></select></td>
                     <td><a href="#" data-bind="click: $root.removeLink">X</a></td>
                 </tbody>
             </table>
@@ -47,8 +48,8 @@
             <table class="table table-sm ">
                 <th>Field</th><th>Asc/Desc</th><th>X</th>
                 <tbody data-bind="foreach: sorts">
-                    <td><select data-bind="options: $root.selectedFields, value: sortField" class="form-control"></select></td>
-                    <td><select data-bind="options: $root.sortDirections, value: sortDirection" class="form-control"></select></td>
+                    <td><select data-bind="options: $root.selectedFields, value: sortField" class="form-control-sm"></select></td>
+                    <td><select data-bind="options: $root.sortDirections, value: sortDirection" class="form-control-sm"></select></td>
                     <td><a href="#" data-bind="click: $root.removeSort">X</a></td>
                 </tbody>
             </table>
@@ -81,10 +82,11 @@
     WHERE <input class="form-control" data-bind="value: whereClause" />
 </div>
 
+
 <div class="container">
 
         <button class="btn btn-primary btn-success" data-bind="click: runQuery">Run query</button>
-        <button class="btn btn-primary" data-bind="click: saveQuery">Save query</button>
+        <button class="btn btn-primary" data-bind="click: saveQueryModal">Save query</button>
 
 </div>
 
@@ -102,12 +104,12 @@
       <div class="modal-body">
         <table width="100%">
             <tr>
-                <td width="150">Name:</td><td><input class="form-control form-control-sm" type="text"></td>
+                <td width="150">Query Name:</td><td><input class="form-control form-control-sm" type="text"></td>
             </tr><tr>
                 <td>Scope:</td><<td><input class="form-control form-control-sm" type="text"></td>
             </tr><tr>
                 <td>Description:</td><td><textarea class="form-control" rows="3"></textarea></td>
-        </tr><tr>
+            </tr><tr>
                 <td>Left Domain:</td><td><span data-bind="text: leftFile"></span></td>
             </tr><tr>
                 <td>Right Domain:</td><td><span data-bind="text: rightFile"></span></td>
@@ -116,7 +118,7 @@
             </tr><tr>
                 <td>Order by:</td><td><span data-bind="text: sorts"></span></td>
             </tr><tr>
-                <td>SQL:</td><td><span data-bind="text: SQLquery"></td>
+                <td>SQL:</td><td><span data-bind="text: sq.SQLquery"></td>
             </tr>
         </table>
 

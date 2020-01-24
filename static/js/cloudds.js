@@ -1,7 +1,8 @@
 
 
-function Link(leftLink, rightLink) {
+function Link(joinType, leftLink, rightLink) {
     var self = this;
+    self.joinType = ko.observable("");
     self.leftLink = ko.observable("");
     self.rightLink = ko.observable("");
 }
@@ -13,10 +14,10 @@ function Sort(sortField, sortDirection) {
 }
 
 
-function StudyQuery(SQLquery, domainList, SQLfieldList) {
+function StudyQuery(SQLquery, domainList, SQLfieldList, sortFields) {
     var self = this;
     self.SQLquery = ko.observable("");
-    self.domainList = [];
+    self.domainList =  ko.observableArray();
     self.SQLfieldList = ko.observableArray();
     self.sortFields = ko.observableArray();
 }
@@ -35,11 +36,13 @@ function SinglepageViewModel() {
     self.leftField = ko.observable();
     self.rightField = ko.observable();
     self.selectedFields = ko.observableArray();
+    self.joinTypes = ["INNER JOIN", "OUTER JOIN", "LEFT JOIN", "RIGHT JOIN"];
     self.sortDirections = ["ASC", "DESC"];
     self.whereClause = ko.observable("");
     self.SQLquery = ko.observable();
     self.links = ko.observableArray([]);
     self.sorts = ko.observableArray([]);
+    self.sq = new StudyQuery("SQL statement", [,], [,], [,]);
 //    self.sortField = ko.observable();
 //    self.sortFields = ko.observableArray([]);
 
@@ -53,7 +56,10 @@ function SinglepageViewModel() {
             self.datasetsList(lijst);
             self.datasetsLijst = lijst;
             self.domainList = result.datasetsList;
-            self.sq = new StudyQuery("", lijst,);
+            //var sq = new StudyQuery("", lijst,[], );
+            self.sq.domainList(lijst);
+            //sqstring = JSON.stringify(self.sq);
+            //alert(sqstring);
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
@@ -72,6 +78,7 @@ function SinglepageViewModel() {
             self.links.removeAll();
             self.sorts.removeAll();
             self.selectedFields.removeAll();
+
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
@@ -97,7 +104,7 @@ function SinglepageViewModel() {
 
 
     self.addLink = function() {
-        self.links.push(new Link("", ""));
+        self.links.push(new Link("", "", ""));
         //alert("array: " + self.links()[0].toString());
     };
 
@@ -119,14 +126,11 @@ function SinglepageViewModel() {
         self.selectedFields.push(self.rightField());
     }
 
-    self.runQuery = function() {
-
-    }
-
-    self.saveQuery = function() {
-        linksLength =  self.links().length;
+    self.buildSQLstring = function() {
+         linksLength =  self.links().length;
         if (linksLength > 0) {
-            joinText = " INNER JOIN " + self.rightFile() + " ON (" + self.links()[0].leftLink() + " = " + self.links()[0].rightLink();
+            joinText = " " + self.links()[0].joinType() + " " + self.rightFile() + " ON (" +
+                self.links()[0].leftLink() + " = " + self.links()[0].rightLink();
             if (linksLength > 1) {
                 for (i = 1; i < linksLength; i++) {
                     joinText += ") AND (" + self.links()[i].leftLink() + " = " + self.links()[i].rightLink();
@@ -158,16 +162,41 @@ function SinglepageViewModel() {
 
         SQLquery = "SELECT " + selection + " FROM " + self.leftFile() + joinText + orderText + whereSQL + ";";
         self.SQLquery(SQLquery);
+        self.sq.SQLquery(SQLquery);
+
+        //var json2 = ko.toJS(self.sq);
+        //alert(JSON.stringify(json2));
+    }
+
+    self.runQuery = function() {
+        self.buildSQLstring();
+        sqstring = JSON.stringify(ko.toJS(self.sq));
+        $.getJSON("/fetchQueryData", {
+            studyPath: self.studypathText(),
+            sqstring: sqstring
+        }).done(function (result, status, xhr) {
+            lijst = result.domainList;
+            self.whereClause(lijst);
+        }).fail(function (xhr, status, error) {
+            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+        });
+
+    }
+
+    self.saveQueryModal = function() {
+        self.buildSQLstring();
         $('#saveModal').modal('toggle');
+    }
+
+    self.saveQuery = function() {
+
     }
 
     self.removeLink = function(link) {self.links.remove(link)}
 
     self.removeSort = function(sort) {self.sorts.remove(sort)}
 
-    self.removeSelectField = function() {
-        { self.selectedFields.pop();}
-    }
+    self.removeSelectField = function() { { self.selectedFields.pop();} }
 
     self.removeAllLinks = function() {
 
@@ -176,6 +205,7 @@ function SinglepageViewModel() {
 
 }
 
+function print() {}
 
 ko.applyBindings(new SinglepageViewModel());
 

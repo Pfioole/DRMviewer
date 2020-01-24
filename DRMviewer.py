@@ -3,6 +3,7 @@ from flask import Flask, render_template, request, escape, Markup, session, json
 import pandas as pd
 from pathlib import Path
 import os
+import json
 
 from flask import escape
 import numpy as np
@@ -161,6 +162,13 @@ def fetchfields():
     fieldlistDict["fieldList"] = cols
     return jsonify(fieldlistDict)
 
+@app.route('/fetchQueryData', methods=['GET'])
+def fetchfQueryData():
+    studyPath = request.args.get('studyPath')
+    sqstring = request.args.get('sqstring')
+    sqDict = json.loads(sqstring);
+    output = sqDict["SQLquery"]
+    return jsonify(sqDict)
 
 @app.route('/selectfile', methods=['POST'])
 def fileselect_page() -> 'html':
