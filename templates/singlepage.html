@@ -10,6 +10,7 @@
     </div>
 </div></br>
 
+<!-- Tabs for Create Query and Re-Use Query -->
 <div class="container">
     <ul class="nav nav-tabs nav-justified">
       <li class="nav-item">
@@ -21,11 +22,12 @@
     </ul>
 </div>
 
+<!-- Query building interface -->
 <div class="container">
     <div class="row">
         <div class="col-sm">
             <strong>Select left file to merge:</strong></br>
-            <select data-bind="options: datasetsList, value: leftFile, event:{change: fetchLeftFields}" class="form-control" ></select>
+            <select data-bind="options: datasetsList, value: sq.leftFile, event:{change: fetchLeftFields}" class="form-control" ></select>
 
             <label for="colselect">Select Left fields:</label>
 			<select data-bind="options: leftFieldList, value: leftField, event:{change: addLeftFieldSelect}" id="leftcolselect" class="form-control" name="leftcolselect" size="10"></select>
@@ -90,6 +92,14 @@
 
 </div>
 
+<p></p>
+<div class = "container-fluid">
+
+    <table id="queryTable" class="display">
+        <thead id="queryTableHead"></thead>
+    </table>
+</div>
+
 <!-- Modal to show the save pop-up -->
 
 <div id= "saveModal" class="modal fade" tabindex="-1" role="dialog">
@@ -110,7 +120,7 @@
             </tr><tr>
                 <td>Description:</td><td><textarea class="form-control" rows="3"></textarea></td>
             </tr><tr>
-                <td>Left Domain:</td><td><span data-bind="text: leftFile"></span></td>
+                <td>Left Domain:</td><td><span data-bind="text: sq.leftFile"></span></td>
             </tr><tr>
                 <td>Right Domain:</td><td><span data-bind="text: rightFile"></span></td>
             </tr><tr>
@@ -137,8 +147,9 @@
 {% block scripts %}
 	<!-- Optional JavaScript -->
     {{ super() }}
-    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script> -->
-    <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.2.0/knockout-min.js"></script>
+    <!-- <script src="http://cdnjs.cloudflare.com/ajax/libs/jquery/1.8.3/jquery.min.js"></script>
+    <script src="http://cdnjs.cloudflare.com/ajax/libs/knockout/2.2.0/knockout-min.js"></script> -->
+    <script src="{{ url_for('static', filename='./js/knockout-min.js') }}"></script>
     <script src="{{ url_for('static', filename='./js/cloudds.js') }}"></script>
 
 {% endblock %}

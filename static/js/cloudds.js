@@ -14,12 +14,14 @@ function Sort(sortField, sortDirection) {
 }
 
 
-function StudyQuery(SQLquery, domainList, SQLfieldList, sortFields) {
+function StudyQuery(SQLquery, domainList, SQLfieldList, sortFields, leftFile, rightFile) {
     var self = this;
     self.SQLquery = ko.observable("");
     self.domainList =  ko.observableArray();
     self.SQLfieldList = ko.observableArray();
     self.sortFields = ko.observableArray();
+    self.leftFile = ko.observable();
+    self.rightFile = ko.observable();
 }
 
 
@@ -42,7 +44,8 @@ function SinglepageViewModel() {
     self.SQLquery = ko.observable();
     self.links = ko.observableArray([]);
     self.sorts = ko.observableArray([]);
-    self.sq = new StudyQuery("SQL statement", [,], [,], [,]);
+    self.sq = new StudyQuery("SQL statement", [,], [,], [,],"" ,
+        "" );
 //    self.sortField = ko.observable();
 //    self.sortFields = ko.observableArray([]);
 
@@ -68,11 +71,11 @@ function SinglepageViewModel() {
     self.fetchLeftFields = function() {
         $.getJSON("/fetchfields", {
             studyPath: self.studypathText(),
-            selectedDomain: self.leftFile(),
+            selectedDomain: self.sq.leftFile(),
         }).done(function (result, status, xhr) {
             lijst = result.fieldList;
             for (i=0; i < lijst.length; i++) {
-                lijst[i] = self.leftFile() + "." + lijst[i];
+                lijst[i] = self.sq.leftFile() + "." + lijst[i];
             }
             self.leftFieldList(lijst);
             self.links.removeAll();
@@ -143,6 +146,7 @@ function SinglepageViewModel() {
         orderLength =  self.sorts().length;
         orderText ="";
         if (orderLength > 0) {
+
             orderText += " ORDER BY " + self.sorts()[0].sortField() + " " + self.sorts()[0].sortDirection();
             if (orderLength > 1) {
                 for (i = 1; i < orderLength; i++) {
@@ -150,6 +154,7 @@ function SinglepageViewModel() {
                 }
             }
         }
+        //alert(" result: " + orderText);
         if (self.whereClause() != "") {
             whereSQL = " WHERE " + self.whereClause();
         } else {
@@ -160,7 +165,7 @@ function SinglepageViewModel() {
         selection = selection.replace(/,/g, "\, ");
         //,str.replace(/blue/g, "red");
 
-        SQLquery = "SELECT " + selection + " FROM " + self.leftFile() + joinText + orderText + whereSQL + ";";
+        SQLquery = "SELECT " + selection + " FROM " + self.sq.leftFile() + joinText + orderText + whereSQL + ";";
         self.SQLquery(SQLquery);
         self.sq.SQLquery(SQLquery);
 
@@ -175,8 +180,20 @@ function SinglepageViewModel() {
             studyPath: self.studypathText(),
             sqstring: sqstring
         }).done(function (result, status, xhr) {
-            lijst = result.domainList;
+            lijst = JSON.stringify(result)
             self.whereClause(lijst);
+            data.content = result;
+            alert(JSON.stringify(data.content));
+
+            headings = "";
+	        for (i=0; i< data.cols.length; i++) {
+		        headings += "<th>" + data.cols[i].data + "</th>"
+	        }
+	        alert(headings);
+	        $("#queryTableHead").html(headings);
+            $('#queryTable').DataTable({destroy: true, data:data.content, columns: data.cols} );
+
+            // $('#queryTable').DataTable({destroy: true ,data: data.content, columns: data.cols} );
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
@@ -209,4 +226,33 @@ function print() {}
 
 ko.applyBindings(new SinglepageViewModel());
 
+
+let data = { "content" :
+	[
+		{
+			"SITEID":		"Tiger",
+			"STUDYID":	"Architect",
+            "SUBJID":     "NaN"
+		},
+		{
+			"SUBJID":       "123",
+		    "SITEID":		"Garret",
+			"STUDYID":	"Director"
+		}
+	],
+
+
+			"cols" : 
+				[
+				    {data: "SITEID"},
+					{data: "STUDYID"},
+                    {data: "SUBJID"}
+				]
+
+};
+
+$(document).ready( function () {
+
+
+} );
 

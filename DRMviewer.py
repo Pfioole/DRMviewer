@@ -164,11 +164,22 @@ def fetchfields():
 
 @app.route('/fetchQueryData', methods=['GET'])
 def fetchfQueryData():
+
     studyPath = request.args.get('studyPath')
     sqstring = request.args.get('sqstring')
     sqDict = json.loads(sqstring);
-    output = sqDict["SQLquery"]
-    return jsonify(sqDict)
+    leftDomain = sqDict["leftFile"]
+    if (studyPath[-1:] not in ["/", "\\"]):
+        studyPath = studyPath + "/"
+    filefolder = studyPath + leftDomain + ".sas7Bdat"
+    filePath = Path(filefolder)
+    df_ds = pd.read_sas(filePath, format='sas7bdat', encoding = 'iso-8859-1')
+    subset = ["STUDYID", "SITEID", "SUBJID"]
+    #df_ds.dropna(inplace=True)
+    df_ds3 = df_ds[subset].head(5)
+    dict_ds = df_ds3.to_dict(orient='records')
+    sqDict["whereClause"] = "JSON is back!"
+    return jsonify(dict_ds)
 
 @app.route('/selectfile', methods=['POST'])
 def fileselect_page() -> 'html':
