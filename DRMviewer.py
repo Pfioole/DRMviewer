@@ -4,6 +4,8 @@ import pandas as pd
 from pathlib import Path
 import os
 import json
+import datetime
+
 
 from flask import escape
 import numpy as np
@@ -15,6 +17,20 @@ app.secret_key = os.urandom(24)
 # working directory cd c:\users\pfioole\onedrive - JNJ\_2019\programming\DRMviewer_0_1
 # py -3 drmviewer.py
 
+# Convertor for datetime to string for JSON dump
+def strconverter(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()
+
+
+#not used at this point
+class Col:
+    def __init__(self, data):
+        self.data = data
+    def __repr__(self):
+        return str(self)
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__)
 
 def createExceptionMarkup(df_exceptions, exceptionRecords):
     
@@ -118,6 +134,8 @@ def entry_page() -> 'html':
     return render_template('entry.html',
                            the_title='DRM viewer', the_path=path)
 
+####################################################################################################
+
 @app.route('/singlepage')
 def singlepage() -> 'html':
     path = "C:/CDR/3945/56021927PCR1024/DRMdata/"
@@ -167,6 +185,7 @@ def fetchfQueryData():
 
     studyPath = request.args.get('studyPath')
     sqstring = request.args.get('sqstring')
+    # print(sqstring)
     sqDict = json.loads(sqstring);
     leftDomain = sqDict["leftFile"]
     if (studyPath[-1:] not in ["/", "\\"]):
@@ -174,12 +193,50 @@ def fetchfQueryData():
     filefolder = studyPath + leftDomain + ".sas7Bdat"
     filePath = Path(filefolder)
     df_ds = pd.read_sas(filePath, format='sas7bdat', encoding = 'iso-8859-1')
-    subset = ["STUDYID", "SITEID", "SUBJID"]
-    #df_ds.dropna(inplace=True)
-    df_ds3 = df_ds[subset].head(5)
-    dict_ds = df_ds3.to_dict(orient='records')
-    sqDict["whereClause"] = "JSON is back!"
-    return jsonify(dict_ds)
+    subset = sqDict["selectedFields"]
+    df_ds = df_ds[subset].head(5)
+    #Datacleaning steps
+
+    #Convert Timestamps to date format that can be serialized in JSON
+    for (y) in df_ds:
+        if (df_ds[y].dtype == "datetime64[ns]"):
+            df_ds[y] = df_ds[y].map(lambda y: pd.Timestamp(y, unit='ms'))
+            df_ds[y] = df_ds[y].map(lambda y: y if (pd.isnull(y)) else y.strftime("%Y/%m/%d"))
+            df_ds[y] = df_ds[y].astype('str')
+
+    #Fill empty fields
+    df_ds = df_ds.fillna("None")
+
+
+    #print(subset)
+    # subset = ["STUDYID", "SITEID", "SUBJID"]
+
+
+    dict_sq = {}
+    #df_ds3 = df_ds[subset]
+    dict_ds = df_ds.to_dict(orient='records')
+    dict_sq["data"] = dict_ds
+
+    cols = []
+    for columnnr in range(len(subset)):
+        cols.append({})
+        cols[columnnr]["data"] = subset[columnnr]
+
+    # Test 1 feb for direct conversion dataframe to json
+    #print(df_ds3.to_json(orient='records'))
+    #dict_sq["data"] = df_ds3.to_json(orient='records')
+
+    #cols.append(col)
+    dict_sq["cols"] = cols
+
+    #print(json.dumps(dict_sq))
+    jsonTable = json.dumps(dict_sq, default=strconverter)
+    print(jsonTable)
+    #dict_sq["cols"] = cols
+
+    return jsonTable
+
+#######################################################################################
 
 @app.route('/selectfile', methods=['POST'])
 def fileselect_page() -> 'html':

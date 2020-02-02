@@ -14,10 +14,11 @@ function Sort(sortField, sortDirection) {
 }
 
 
-function StudyQuery(SQLquery, domainList, SQLfieldList, sortFields, leftFile, rightFile) {
+function StudyQuery(SQLquery, domainList, selectedFields, SQLfieldList, sortFields, leftFile, rightFile) {
     var self = this;
     self.SQLquery = ko.observable("");
     self.domainList =  ko.observableArray();
+    self.selectedFields = ko.observableArray();
     self.SQLfieldList = ko.observableArray();
     self.sortFields = ko.observableArray();
     self.leftFile = ko.observable();
@@ -44,7 +45,7 @@ function SinglepageViewModel() {
     self.SQLquery = ko.observable();
     self.links = ko.observableArray([]);
     self.sorts = ko.observableArray([]);
-    self.sq = new StudyQuery("SQL statement", [,], [,], [,],"" ,
+    self.sq = new StudyQuery("SQL statement", [,], [], [,], [,],"" ,
         "" );
 //    self.sortField = ko.observable();
 //    self.sortFields = ko.observableArray([]);
@@ -75,7 +76,7 @@ function SinglepageViewModel() {
         }).done(function (result, status, xhr) {
             lijst = result.fieldList;
             for (i=0; i < lijst.length; i++) {
-                lijst[i] = self.sq.leftFile() + "." + lijst[i];
+                // lijst[i] = self.sq.leftFile() + "." + lijst[i];
             }
             self.leftFieldList(lijst);
             self.links.removeAll();
@@ -173,23 +174,134 @@ function SinglepageViewModel() {
         //alert(JSON.stringify(json2));
     }
 
-    self.runQuery = function() {
+
+    self.runInitial = function() {
         self.buildSQLstring();
+        self.sq.selectedFields = self.selectedFields();
+        //alert("JS sent selected fields : " + self.sq.selectedFields);
+        sqstring = JSON.stringify(ko.toJS(self.sq));
+
+        var qTable = $('#queryTable').DataTable({
+            scrollCollapse: false,
+            paging: true,
+            pagingType: 'simple_numbers',
+            lengthMenu: [[10, 25, 50, 100, -1], [10, 25, 50, 100, 'All']],
+            processing: true,
+            serverSide: true,
+            ajax: {
+                url: "/fetchQueryData",
+                data: {
+                    studyPath: self.studypathText(),
+                    sqstring: sqstring,
+                    //draw: parseInt(1),
+                    length: (10),
+                    start: parseInt(1)
+                }
+            },
+            searching: false,
+            info: false,
+        });
+    }
+
+    self.runQuery3 = function () {
+        self.buildSQLstring();
+        sqstring = JSON.stringify(ko.toJS(self.sq));
+
+        $.getJSON( '/fetchQueryData', {
+                studyPath: self.studypathText(),
+                sqstring: sqstring
+            }, function ( json ) {
+            //table.destroy();
+            //$('#queryTable').empty(); // empty in case the columns change
+            headings = "<thead><tr>";
+	        for (i=0; i< data.cols.length; i++) {
+		        headings += "<th>" + data.cols[i].data + "</th>";
+                //headings += "<th>" + result.cols[i] + "</th>"
+	        }
+	        headings += "</tr></thead>";
+            var qTable = $('#queryTable').DataTable( {
+                columns: json.cols,
+                data:    json.data
+            } );
+        } );
+    };
+
+    self.runQuery2 = function() {
+        self.buildSQLstring();
+        self.sq.selectedFields = self.selectedFields();
+        //alert("JS sent selected fields : " + self.sq.selectedFields);
         sqstring = JSON.stringify(ko.toJS(self.sq));
         $.getJSON("/fetchQueryData", {
             studyPath: self.studypathText(),
             sqstring: sqstring
         }).done(function (result, status, xhr) {
-            lijst = JSON.stringify(result)
-            self.whereClause(lijst);
-            data.content = result;
-            alert(JSON.stringify(data.content));
+            selectlijst = JSON.stringify(result);
+            alert("volledig lijst non stringified = " + selectlijst);
+            data.content = result.data;
+            // data.content = lijst.data;
+            data.cols = result.cols;
+
+            if (firstround == true) {
+                alert('firstround is true');
+            } else {
+                alert("in the loop");
+                qTable.destroy();
+                $('#queryTable').empty(); // empty in case the columns change
+            }
+
+            //qTable.destroy();
+            //$('#queryTable').empty(); // empty in case the columns change
+
+            headings = "<thead><tr>";
+	        for (i=0; i< data.cols.length; i++) {
+		        headings += "<th>" + data.cols[i].data + "</th>";
+                //headings += "<th>" + result.cols[i] + "</th>"
+	        }
+	        headings += "</tr></thead>";
+
+
+	        //data.content = result.data
+	        alert("headings: " + headings);
+
+            //qTable.destroy();
+            $('#queryTable').empty();
+ 	        $("#queryTable").html(headings);
+ 	        if (firstround == true) {
+ 	            var qTable = $('#queryTable').DataTable({ data:data.content, columns: data.cols} );
+            } else {
+ 	            qTable = $('#queryTable').DataTable({ data:data.content, columns: data.cols} );
+            }
+            firstround = false;
+
+            // $('#queryTable').DataTable({destroy: true ,data: data.content, columns: data.cols} );
+        }).fail(function (xhr, status, error) {
+            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+        });
+
+    }
+
+    self.runQuery = function() {
+        self.buildSQLstring();
+        self.sq.selectedFields = self.selectedFields();
+        //alert("JS sent selected fields : " + self.sq.selectedFields);
+        sqstring = JSON.stringify(ko.toJS(self.sq));
+        $.getJSON("/fetchQueryData", {
+            studyPath: self.studypathText(),
+            sqstring: sqstring
+        }).done(function (result, status, xhr) {
+            selectlijst = JSON.stringify(result);
+            alert("volledig lijst non stringified = " + selectlijst);
+            data.content = result.data;
+            // data.content = lijst.data;
+            data.cols = result.cols;
 
             headings = "";
 	        for (i=0; i< data.cols.length; i++) {
 		        headings += "<th>" + data.cols[i].data + "</th>"
+                //headings += "<th>" + result.cols[i] + "</th>"
 	        }
-	        alert(headings);
+	        //data.content = result.data
+	        //alert("headings: " + headings);
 	        $("#queryTableHead").html(headings);
             $('#queryTable').DataTable({destroy: true, data:data.content, columns: data.cols} );
 
@@ -225,6 +337,24 @@ function SinglepageViewModel() {
 function print() {}
 
 ko.applyBindings(new SinglepageViewModel());
+var firstround = true;
+
+
+
+$('#submit').on( 'click', function () {
+    $.getJSON( '/fetchQueryData', {
+            studyPath: "C:/CDR/3945/56021927PCR1024/DRMdata/",
+            sqstring: sqstring
+        }, function ( json ) {
+        //table.destroy();
+        //$('#queryTable').empty(); // empty in case the columns change
+
+        var qTable = $('#queryTable').DataTable( {
+            columns: json.cols,
+            data:    json.data
+        } );
+    } );
+} );
 
 
 let data = { "content" :
@@ -242,17 +372,17 @@ let data = { "content" :
 	],
 
 
-			"cols" : 
+			"cols" :
 				[
 				    {data: "SITEID"},
 					{data: "STUDYID"},
                     {data: "SUBJID"}
 				]
-
 };
+//var qTable = $('#queryTable').DataTable() ;
 
 $(document).ready( function () {
-
-
+    //var qTable = $('#queryTable').DataTable();
+    //var qTable = $('#queryTable').DataTable();
 } );
 

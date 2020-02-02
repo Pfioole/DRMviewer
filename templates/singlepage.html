@@ -71,7 +71,7 @@
     SELECT <span data-bind="text: selectedFields" class="h6"></span> <a href="#" data-bind="click: $root.removeSelectField">X</a>
 </div>
 <div class="container">
-    from <span class="h6"  data-bind="text: leftFile"></span>
+    from <span class="h6"  data-bind="text: sq.leftFile"></span>
     inner join  <span class="h6" data-bind="text: rightFile"> </span>
 </div>
 <div class="container">
@@ -89,7 +89,7 @@
 
         <button class="btn btn-primary btn-success" data-bind="click: runQuery">Run query</button>
         <button class="btn btn-primary" data-bind="click: saveQueryModal">Save query</button>
-
+        <button class="btn btn-danger" data-bind="click: runQuery3">Run query3</button>
 </div>
 
 <p></p>
