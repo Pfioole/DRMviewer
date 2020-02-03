@@ -1,5 +1,4 @@
 
-var qTable = null;
 
 function Link(joinType, leftLink, rightLink) {
     var self = this;
@@ -175,43 +174,6 @@ function SinglepageViewModel() {
         //alert(JSON.stringify(json2));
     }
 
-    self.runQuery4 = function() {
-        self.buildSQLstring();
-        self.sq.selectedFields = self.selectedFields();
-        //alert("JS sent selected fields : " + self.sq.selectedFields);
-        sqstring = JSON.stringify(ko.toJS(self.sq));
-        $.getJSON('/fetchQueryData', {
-            studyPath: self.studypathText(),
-            sqstring: sqstring
-        }, function(data, status, xhr) {
-            //$("#elements").text(data.number_elements);
-            if (qTable !== null) {
-              qTable.destroy();
-              qTable = null;
-              $("#queryTable").empty();
-            }
-
-            headings = "<thead id='queryTableHead'></thead>";
-	        $("#queryTable").html(headings);
-
-            qTable = $("#queryTable").DataTable({
-              data: data.data,
-              columns: data.cols
-            });
-
-             headings = "<tr>";
-	        for (i=0; i< data.cols.length; i++) {
-		        headings += "<th>" + data.cols[i].data + "</th>"
-                //headings += "<th>" + result.cols[i] + "</th>"
-	        }
-	        headings += "</tr>";
-	        $("#queryTableHead").html(headings);
-
-
-        });
-        return false;
-    }
-
 
     self.runInitial = function() {
         self.buildSQLstring();
@@ -378,7 +340,7 @@ ko.applyBindings(new SinglepageViewModel());
 var firstround = true;
 
 
-/*
+
 $('#submit').on( 'click', function () {
     $.getJSON( '/fetchQueryData', {
             studyPath: "C:/CDR/3945/56021927PCR1024/DRMdata/",
@@ -393,7 +355,7 @@ $('#submit').on( 'click', function () {
         } );
     } );
 } );
-*/
+
 
 let data = { "content" :
 	[
@@ -420,7 +382,6 @@ let data = { "content" :
 //var qTable = $('#queryTable').DataTable() ;
 
 $(document).ready( function () {
-
     //var qTable = $('#queryTable').DataTable();
     //var qTable = $('#queryTable').DataTable();
 } );
