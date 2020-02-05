@@ -1,10 +1,13 @@
 from flask import Flask, render_template, request, escape, Markup, session, jsonify
 # from flask_bootstrap import Bootstrap
 import pandas as pd
+import pandasql as psql
+
 from pathlib import Path
 import os
 import json
 import datetime
+
 
 
 from flask import escape
@@ -207,13 +210,7 @@ def fetchfQueryData():
     #Fill empty fields
     df_ds = df_ds.fillna("None")
 
-
-    #print(subset)
-    # subset = ["STUDYID", "SITEID", "SUBJID"]
-
-
     dict_sq = {}
-    #df_ds3 = df_ds[subset]
     dict_ds = df_ds.to_dict(orient='records')
     dict_sq["data"] = dict_ds
 
@@ -222,11 +219,6 @@ def fetchfQueryData():
         cols.append({})
         cols[columnnr]["data"] = subset[columnnr]
 
-    # Test 1 feb for direct conversion dataframe to json
-    #print(df_ds3.to_json(orient='records'))
-    #dict_sq["data"] = df_ds3.to_json(orient='records')
-
-    #cols.append(col)
     dict_sq["cols"] = cols
 
     #print(json.dumps(dict_sq))
@@ -235,6 +227,67 @@ def fetchfQueryData():
     #dict_sq["cols"] = cols
 
     return jsonTable
+
+@app.route('/fetchSQLdata', methods=['GET'])
+def fetchSQLdata():
+
+    studyPath = request.args.get('studyPath')
+    sqstring = request.args.get('sqstring')
+    # print(sqstring)
+    sqDict = json.loads(sqstring);
+    leftDomain = sqDict["leftFile"]
+#    rightDomain = sqDict["rightFile"]
+    if (studyPath[-1:] not in ["/", "\\"]):
+        studyPath = studyPath + "/"
+    leftfilefolder = studyPath + leftDomain + ".sas7Bdat"
+ #   rightfilefolder = studyPath + rightDomain + ".sas7Bdat"
+    leftFilePath = Path(leftfilefolder)
+ #   rightFilePath = Path(rightfilefolder)
+    df_left = pd.read_sas(leftFilePath, format='sas7bdat', encoding = 'iso-8859-1')
+    #print(df_left["STUDYID"].head(5))
+ #   df_right = pd.read_sas(rightFilePath, format='sas7bdat', encoding = 'iso-8859-1')
+    q = sqDict["SQLquery"]
+    #pysqldf = lambda q: psql.sqldf(q, globals())
+    #q = sqDict["SQLquery"]
+    searchString = "FROM " + leftDomain
+    replaceString = "FROM df_left AS " + leftDomain
+    q = q.replace(searchString, replaceString)
+    print(q)
+    df_ds = psql.sqldf(q, locals())
+    #df_ds = pysqldf("""SELECT SUBJID FROM df_left LIMIT 5;""")
+
+    #Datacleaning steps
+
+    #Convert Timestamps to date format that can be serialized in JSON
+    for (y) in df_ds:
+        if (df_ds[y].dtype == "datetime64[ns]"):
+            df_ds[y] = df_ds[y].map(lambda y: pd.Timestamp(y, unit='ms'))
+            df_ds[y] = df_ds[y].map(lambda y: y if (pd.isnull(y)) else y.strftime("%Y/%m/%d"))
+            df_ds[y] = df_ds[y].astype('str')
+
+    #Fill empty fields
+    df_ds = df_ds.fillna("None")
+
+    dict_sq = {}
+    dict_ds = df_ds.to_dict(orient='records')
+    dict_sq["data"] = dict_ds
+
+    subset = sqDict["selectedFields"]
+    cols = []
+    for columnnr in range(len(subset)):
+        cols.append({})
+        cols[columnnr]["data"] = subset[columnnr]
+
+    dict_sq["cols"] = cols
+
+    #print(json.dumps(dict_sq))
+    jsonTable = json.dumps(dict_sq, default=strconverter)
+    print(jsonTable)
+    #dict_sq["cols"] = cols
+
+    return jsonTable
+
+
 
 #######################################################################################
 

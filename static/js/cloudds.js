@@ -212,7 +212,44 @@ function SinglepageViewModel() {
         return false;
     }
 
+    self.runSQLquery = function() {
+        self.buildSQLstring();
+        self.sq.selectedFields = self.selectedFields();
+        //alert("JS sent selected fields : " + self.sq.selectedFields);
+        sqstring = JSON.stringify(ko.toJS(self.sq));
+        $.getJSON('/fetchSQLdata', {
+            studyPath: self.studypathText(),
+            sqstring: sqstring
+        }, function(data, status, xhr) {
+            //$("#elements").text(data.number_elements);
+            if (qTable !== null) {
+              qTable.destroy();
+              qTable = null;
+              $("#queryTable").empty();
+            }
 
+            headings = "<thead id='queryTableHead'></thead>";
+	        $("#queryTable").html(headings);
+
+            qTable = $("#queryTable").DataTable({
+              data: data.data,
+              columns: data.cols
+            });
+
+             headings = "<tr>";
+	        for (i=0; i< data.cols.length; i++) {
+		        headings += "<th>" + data.cols[i].data + "</th>"
+                //headings += "<th>" + result.cols[i] + "</th>"
+	        }
+	        headings += "</tr>";
+	        $("#queryTableHead").html(headings);
+
+
+        });
+        return false;
+    }
+
+/*
     self.runInitial = function() {
         self.buildSQLstring();
         self.sq.selectedFields = self.selectedFields();
@@ -349,6 +386,7 @@ function SinglepageViewModel() {
         });
 
     }
+*/
 
     self.saveQueryModal = function() {
         self.buildSQLstring();
