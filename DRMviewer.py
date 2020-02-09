@@ -197,6 +197,12 @@ def fetchfQueryData():
     filePath = Path(filefolder)
     df_ds = pd.read_sas(filePath, format='sas7bdat', encoding = 'iso-8859-1')
     subset = sqDict["selectedFields"]
+
+    shortSubset = [x.split('.')[1] if x==x else None for x in subset]
+
+    subset = shortSubset
+    print(subset)
+
     df_ds = df_ds[subset].head(5)
     #Datacleaning steps
 
@@ -230,31 +236,39 @@ def fetchfQueryData():
 
 @app.route('/fetchSQLdata', methods=['GET'])
 def fetchSQLdata():
-
     studyPath = request.args.get('studyPath')
     sqstring = request.args.get('sqstring')
-    # print(sqstring)
-    sqDict = json.loads(sqstring);
+    print(sqstring)
+    sqDict = json.loads(sqstring)
     leftDomain = sqDict["leftFile"]
-#    rightDomain = sqDict["rightFile"]
     if (studyPath[-1:] not in ["/", "\\"]):
         studyPath = studyPath + "/"
     leftfilefolder = studyPath + leftDomain + ".sas7Bdat"
- #   rightfilefolder = studyPath + rightDomain + ".sas7Bdat"
     leftFilePath = Path(leftfilefolder)
- #   rightFilePath = Path(rightfilefolder)
     df_left = pd.read_sas(leftFilePath, format='sas7bdat', encoding = 'iso-8859-1')
     #print(df_left["STUDYID"].head(5))
- #   df_right = pd.read_sas(rightFilePath, format='sas7bdat', encoding = 'iso-8859-1')
+
     q = sqDict["SQLquery"]
     #pysqldf = lambda q: psql.sqldf(q, globals())
     #q = sqDict["SQLquery"]
     searchString = "FROM " + leftDomain
     replaceString = "FROM df_left AS " + leftDomain
     q = q.replace(searchString, replaceString)
-    print(q)
+
+    rightDomain = sqDict["rightFile"]
+    if (rightDomain):
+        rightfilefolder = studyPath + rightDomain + ".sas7Bdat"
+        rightFilePath = Path(rightfilefolder)
+        df_right = pd.read_sas(rightFilePath, format='sas7bdat', encoding = 'iso-8859-1')
+        print(df_right["STUDYID"].head(5))
+        searchString = "JOIN " + rightDomain
+        replaceString = "JOIN df_right AS " + rightDomain
+        q = q.replace(searchString, replaceString)
+    #print(q)
     df_ds = psql.sqldf(q, locals())
     #df_ds = pysqldf("""SELECT SUBJID FROM df_left LIMIT 5;""")
+    tupleCols = tuple(sqDict["selectedFields"])
+    df_ds.columns = tupleCols
 
     #Datacleaning steps
 
@@ -267,27 +281,63 @@ def fetchSQLdata():
 
     #Fill empty fields
     df_ds = df_ds.fillna("None")
-
+    df_ds = df_ds  #.head(4)
+    print(df_ds.head())
     dict_sq = {}
     dict_ds = df_ds.to_dict(orient='records')
     dict_sq["data"] = dict_ds
 
     subset = sqDict["selectedFields"]
     cols = []
+    coldefs = []
     for columnnr in range(len(subset)):
         cols.append({})
         cols[columnnr]["data"] = subset[columnnr]
-
+        coldefs.append({})
+        coldefs[columnnr]["title"] = subset[columnnr]
+        coldefs[columnnr]["targets"] = columnnr
     dict_sq["cols"] = cols
+    dict_sq["coldefs"] = coldefs
 
     #print(json.dumps(dict_sq))
     jsonTable = json.dumps(dict_sq, default=strconverter)
     print(jsonTable)
+    findLeft = leftDomain + "."
+    replaceLeft = leftDomain + "_"
+    findRight = rightDomain + "."
+    replaceRight = rightDomain + "_"
+    jsonTable = jsonTable.replace(findLeft, replaceLeft)
+    jsonTable = jsonTable.replace(findRight, replaceRight)
     #dict_sq["cols"] = cols
+    print(jsonTable)
 
     return jsonTable
 
+@app.route('/saveQuery', methods=['GET'])
+def saveQuery():
+    sqstring = request.args.get('sqstring')
+    print(sqstring)
+    sqDict = json.loads(sqstring)
+    filepath = "./queries/" + sqDict["name"] + ".json"
+    prettySQstring = json.dumps(sqDict, indent=4)
+    print(prettySQstring)
+    queryFile = open(filepath, "w")
+    queryFile.write(prettySQstring)
+    queryFile.close()
 
+    return prettySQstring
+
+@app.route('/fetchQueries', methods=['GET'])
+def fetchQueries():
+    #studyPath = request.args.get('studyPath')
+    datafolder = "./queries/"
+    #session['datafolder'] = studyPath
+
+    filelist = os.listdir(datafolder)
+    print(filelist)
+    filelistDict = {}
+    filelistDict["queryList"] = filelist
+    return jsonify(filelistDict)
 
 #######################################################################################
 

@@ -10,92 +10,135 @@
     </div>
 </div></br>
 
-<!-- Tabs for Create Query and Re-Use Query -->
-<div class="container">
-    <ul class="nav nav-tabs nav-justified">
-      <li class="nav-item">
-        <a class="nav-link active" href="#">Create Query</a>
-      </li>
-      <li class="nav-item">
-        <a class="nav-link" href="#">Re-use query</a>
-      </li>
-    </ul>
-</div>
+<!-- Master Div to show only when study has been selected -->
+<div id="MasterDiv" class="d-none">
 
-<!-- Query building interface -->
-<div class="container">
-    <div class="row">
-        <div class="col-sm">
-            <strong>Select left file to merge:</strong></br>
-            <select data-bind="options: datasetsList, value: sq.leftFile, event:{change: fetchLeftFields}" class="form-control" ></select>
 
-            <label for="colselect">Select Left fields:</label>
-			<select data-bind="options: leftFieldList, value: leftField, event:{change: addLeftFieldSelect}" id="leftcolselect" class="form-control" name="leftcolselect" size="10"></select>
-        </div>
 
-        <div class="col-sm">
-            <strong>Join:</strong></br>
-            <table class="table table-sm ">
-                <th>Type</th><th>Left</th><th>Right</th><th>X</th>
-                <tbody data-bind="foreach: links">
-                    <td><select data-bind="options: $root.joinTypes, value: joinType" class="form-control-sm"></select></td>
-                    <td><select data-bind="options: $root.leftFieldList, value: leftLink" class="form-control-sm"></select></td>
-                    <td><select data-bind="options: $root.rightFieldList, value: rightLink" class="form-control-sm"></select></td>
-                    <td><a href="#" data-bind="click: $root.removeLink">X</a></td>
-                </tbody>
-            </table>
-            <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addLink">Add Link</button></br></br>
+    <!-- Tabs for Create Query and Re-Use Query -->
 
-            <strong>order by:</strong></br>
-            <table class="table table-sm ">
-                <th>Field</th><th>Asc/Desc</th><th>X</th>
-                <tbody data-bind="foreach: sorts">
-                    <td><select data-bind="options: $root.selectedFields, value: sortField" class="form-control-sm"></select></td>
-                    <td><select data-bind="options: $root.sortDirections, value: sortDirection" class="form-control-sm"></select></td>
-                    <td><a href="#" data-bind="click: $root.removeSort">X</a></td>
-                </tbody>
-            </table>
-            <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addSort">Add Sorting</button></br>
-        </div>
 
-        <div class="col-sm">
-            <strong>Select right file to merge:</strong></br>
-            <select data-bind="options: datasetsList, value: rightFile, event:{change: fetchRightFields}" class="form-control" ></select>
-            <label for="rightcolselect">Select right fields:</label>
-			<select data-bind="options: rightFieldList, value: rightField, event:{change: addRightFieldSelect}" id="rightcolselect" class="form-control" name="rightcolselect" size="10"></select>
+    <div class="container">
+        <ul class="nav nav-tabs" id="myTab" role="tablist">
+          <li class="nav-item">
+            <a class="nav-link active" id="edit-tab" data-toggle="tab" href="#editTab" role="tab" aria-controls="editTab" aria-selected="true">Build Query</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link " data-bind="click: loadQueries" id="load-tab" data-toggle="tab" href="#load" role="tab" aria-controls="load" aria-selected="false">Load Query</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" id="compare-tab" data-toggle="tab" href="#compare" role="tab" aria-controls="compare" aria-selected="false">Compare Files</a>
+          </li>
+        </ul>
+
+
+        <div class="tab-content" id="myTabContent">
+          <div class="tab-pane fade show active" id="editTab" role="tabpanel" aria-labelledby="edit-tab">
+
+
+              <!-- QueryBuilder Div-->
+                <div id="QueryBuilderDiv">
+
+                    <!-- Query building interface -->
+                    <div class="container">
+                        <div class="row">
+                            <div class="col-sm">
+                                <strong>Select left file to merge:</strong></br>
+                                <select data-bind="options: datasetsList, value: sq.leftFile, event:{change: fetchLeftFields}" class="form-control" ></select>
+
+                                <label for="colselect">Select Left fields:</label>
+                                <select data-bind="options: leftFieldList, value: leftField, event:{change: addLeftFieldSelect}" id="leftcolselect" class="form-control" name="leftcolselect" size="10"></select>
+                            </div>
+
+                            <div class="col-sm">
+                                <strong>Join:</strong></br>
+                                <table class="table table-sm ">
+                                    <th>Type</th><th>Left</th><th>Right</th><th>X</th>
+                                    <tbody data-bind="foreach: links">
+                                        <td><select data-bind="options: $root.joinTypes, value: joinType" class="form-control-sm"></select></td>
+                                        <td><select data-bind="options: $root.leftFieldList, value: leftLink" class="form-control-sm"></select></td>
+                                        <td><select data-bind="options: $root.rightFieldList, value: rightLink" class="form-control-sm"></select></td>
+                                        <td><a href="#" data-bind="click: $root.removeLink">X</a></td>
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addLink">Add Link</button></br></br>
+
+                                <strong>order by:</strong></br>
+                                <table class="table table-sm ">
+                                    <th>Field</th><th>Asc/Desc</th><th>X</th>
+                                    <tbody data-bind="foreach: sorts">
+                                        <td><select data-bind="options: $root.sq.selectedFields, value: sortField" class="form-control-sm"></select></td>
+                                        <td><select data-bind="options: $root.sortDirections, value: sortDirection" class="form-control-sm"></select></td>
+                                        <td><a href="#" data-bind="click: $root.removeSort">X</a></td>
+                                    </tbody>
+                                </table>
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addSort">Add Sorting</button></br>
+                            </div>
+
+                            <div class="col-sm">
+                                <strong>Select right file to merge:</strong></br>
+                                <select data-bind="options: datasetsList, value: sq.rightFile, event:{change: fetchRightFields}" class="form-control" ></select>
+                                <label for="rightcolselect">Select right fields:</label>
+                                <select data-bind="options: rightFieldList, value: rightField, event:{change: addRightFieldSelect}" id="rightcolselect" class="form-control" name="rightcolselect" size="10"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="container">
+                        SELECT <span data-bind="text: sq.selectedFields" class="h6"></span> <a href="#" data-bind="click: $root.removeSelectField">X</a>
+                    </div>
+                    <div class="container">
+                        from <span class="h6"  data-bind="text: sq.leftFile"></span>
+                        inner join  <span class="h6" data-bind="text: sq.rightFile"> </span>
+                    </div>
+                    <div class="container">
+                        <span data-bind="foreach: links">
+                            ON (<span data-bind="text: leftLink"></span> = <span data-bind="text: rightLink"></span>)</span></br>
+                         </span>
+                    </div>
+
+                    <div class="container">
+                        WHERE <input class="form-control" data-bind="value: whereClause" />
+                    </div>
+
+                <!-- end of QueryBuilderDiv -->
+                </div>
+
+                <div class="container">
+                <!--
+                        <button class="btn btn-primary btn-success" data-bind="click: runQuery">Run query</button>
+                        <button class="btn btn-danger" data-bind="click: runQuery3">Run query3</button>
+                -->
+                        <button class="btn btn-secondary" data-bind="click: runQuery4">Run Python query4</button>
+                        <button class="btn btn-danger" id="btnRunQuery" data-bind="click: runSQLquery">Run SQL query</button>
+                        <button class="btn btn-success d-none" id="btnEditQuery" data-bind="click: editSQLquery">edit SQL query</button>
+                        <button class="btn btn-primary" data-bind="click: saveQueryModal">Save query</button>
+                </div>
+
+
+
+          </div>
+          <div class="tab-pane fade" id="load" role="tabpanel" aria-labelledby="load-tab">
+              <!-- <button type="button" class="btn btn-outline-primary btn-xs"  data-bind="click: function(){ viewQuery('test.json') }">Fix button test</button> -->
+              <p></p>
+              <ul class="list-group" id="loadList"></ul>
+              <p></p>
+          </div>
+          <div class="tab-pane fade" id="compare" role="tabpanel" aria-labelledby="compare-tab">...</div>
         </div>
     </div>
-</div>
-
-<div class="container">
-    SELECT <span data-bind="text: selectedFields" class="h6"></span> <a href="#" data-bind="click: $root.removeSelectField">X</a>
-</div>
-<div class="container">
-    from <span class="h6"  data-bind="text: sq.leftFile"></span>
-    inner join  <span class="h6" data-bind="text: rightFile"> </span>
-</div>
-<div class="container">
-    <span data-bind="foreach: links">
-        ON (<span data-bind="text: leftLink"></span> = <span data-bind="text: rightLink"></span>)</span></br>
-     </span>
-</div>
-
-<div class="container">
-    WHERE <input class="form-control" data-bind="value: whereClause" />
-</div>
 
 
-<div class="container">
-<!--
-        <button class="btn btn-primary btn-success" data-bind="click: runQuery">Run query</button>
-        <button class="btn btn-danger" data-bind="click: runQuery3">Run query3</button>
--->
-        <button class="btn btn-danger" data-bind="click: runQuery4">Run Python query4</button>
-        <button class="btn btn-danger" data-bind="click: runSQLquery">Run SQL query</button>
-        <button class="btn btn-primary" data-bind="click: saveQueryModal">Save query</button>
+
+
+
+
+
+
+
 </div>
 
-<p></p>
+<!-- Datatable Div -->
 <div class = "container-fluid">
 
     <table id="queryTable" class="display">
@@ -117,17 +160,23 @@
       <div class="modal-body">
         <table width="100%">
             <tr>
-                <td width="150">Query Name:</td><td><input class="form-control form-control-sm" type="text"></td>
+                <td width="150">Query Name:</td><td>
+                <input class="form-control form-control-sm" type="text" data-bind="value: sq.name"></td>
             </tr><tr>
-                <td>Scope:</td><<td><input class="form-control form-control-sm" type="text"></td>
+                <td>Data Model:</td><<td>
+                <input class="form-control form-control-sm" type="text" data-bind="value: sq.dataModel"></td>
             </tr><tr>
-                <td>Description:</td><td><textarea class="form-control" rows="3"></textarea></td>
+                <td>Scope:</td><<td><input class="form-control form-control-sm" type="text" data-bind="value: sq.scope">
+                </td>
+            </tr><tr>
+                <td>Description:</td><td><textarea class="form-control" rows="3" data-bind="value: sq.description">
+                </textarea></td>
             </tr><tr>
                 <td>Left Domain:</td><td><span data-bind="text: sq.leftFile"></span></td>
             </tr><tr>
-                <td>Right Domain:</td><td><span data-bind="text: rightFile"></span></td>
+                <td>Right Domain:</td><td><span data-bind="text: sq.rightFile"></span></td>
             </tr><tr>
-                <td>Selected fields:</td><td><span data-bind="text: selectedFields"></span></td>
+                <td>Selected fields:</td><td><span data-bind="text: sq.selectedFields"></span></td>
             </tr><tr>
                 <td>Order by:</td><td><span data-bind="text: sorts"></span></td>
             </tr><tr>
@@ -137,12 +186,14 @@
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary">Save query</button>
+        <button type="button" class="btn btn-primary" data-bind="click: saveQuery">Save query</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
+
+</div> <!-- Ends MasterDiv>
 
 
 {% endblock %}
