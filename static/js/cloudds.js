@@ -295,30 +295,14 @@ function SinglepageViewModel() {
             $("#loadList").html("");
 
             for (i=0; i<list.length; i++ ) {
-                element = '<li class="list-group-item" data-bind="click: function(){viewQuery(' + list[i] + ')}">' + list[i] + '</li>'
+
+                element = '<a href="#" class="list-group-item list-group-item-action viewQuery" id="' + list[i] + '">' +
+                    list[i] + '</a>'
+
+                //element = '<li class="list-group-item viewQuery" id="' +
+                  //  list[i] + '">' + list[i]+ '</li>'
                 $("#loadList").append(element);
             }
-
-
-
-
-
-            /*
-            loadTableHTML = '<table><thead><th>Query</th><th>click to load</th></thead><tbody>'
-            for (i=0; i<list.length; i++ ) {
-                loadTableHTML += "<tr><td>" + list[i] + '</td><td><button type="button" ' +
-                    ' class="btn btn-outline-primary btn-xs" ' +
-                    ' data-bind="click: function(){ root.viewQuery(';
-                loadTableHTML +=    "'" + list[i] +  "'" ;
-                loadTableHTML += '); }">Load</button></td></tr>';
-            }
-            loadTableHTML += '</tbody></thead>';
-            loadTableHTML += '<button type="button" class="btn btn-outline-primary btn-xs"  data-bind="click: test">test</button>';
-
-            alert(loadTableHTML);
-            $("#loadPane").html(loadTableHTML);
-            */
-            //$('#saveModal').modal('toggle');
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
@@ -349,6 +333,9 @@ ko.applyBindings(new SinglepageViewModel());
 
 viewQuery = function(queryFile) {
         alert("queryfile : " + queryFile);
+
+
+
     }
 
 
@@ -376,6 +363,17 @@ let data = { "content" :
 //var qTable = $('#queryTable').DataTable() ;
 
 $(document).ready( function () {
+    $(document).on("click", ".viewQuery", function() {
+        var queryFile = $(this).attr("id");
 
+        $.getJSON("/fetchQueryContent", {
+            queryFile: queryFile,
+         }).done(function (result, status, xhr) {
+                //alert("full data: " + JSON.stringify(result));
+                alert(JSON.stringify(result))
+         }).fail(function (xhr, status, error) {
+            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+         });
+    })
 } );
 

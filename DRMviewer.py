@@ -339,6 +339,16 @@ def fetchQueries():
     filelistDict["queryList"] = filelist
     return jsonify(filelistDict)
 
+@app.route('/fetchQueryContent', methods=['GET'])
+def fetchQueryContent():
+    file = request.args.get('queryFile')
+    filepath = "./queries/" + file
+    #session['datafolder'] = studyPath
+    with open(filepath) as json_file:
+        queryJSON = json.load(json_file)
+    print(queryJSON)
+    return jsonify(queryJSON)
+
 #######################################################################################
 
 @app.route('/selectfile', methods=['POST'])
