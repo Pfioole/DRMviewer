@@ -255,6 +255,7 @@ function SinglepageViewModel() {
 	        headings += "</tr>";
 	        $("#queryTableHead").html(headings);
             */
+            $("#DatatableDiv").removeClass('d-none');
             $("#QueryBuilderDiv").addClass('d-none');
             $("#btnEditQuery").removeClass('d-none');
             $("#btnRunQuery").addClass('d-none');
@@ -286,6 +287,7 @@ function SinglepageViewModel() {
     }
 
     self.loadQueries = function() {
+        $("#DatatableDiv").addClass('d-none');
         sqstring = JSON.stringify(ko.toJS(self.sq));
         $.getJSON("/fetchQueries", {
             sqstring: sqstring,

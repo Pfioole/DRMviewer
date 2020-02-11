@@ -21,7 +21,7 @@
     <div class="container">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item">
-            <a class="nav-link active" id="edit-tab" data-toggle="tab" href="#editTab" role="tab" aria-controls="editTab" aria-selected="true">Build Query</a>
+            <a class="nav-link active" data-bind="click: editSQLquery" id="edit-tab" data-toggle="tab" href="#editTab" role="tab" aria-controls="editTab" aria-selected="true">Build Query</a>
           </li>
           <li class="nav-item">
             <a class="nav-link " data-bind="click: loadQueries" id="load-tab" data-toggle="tab" href="#load" role="tab" aria-controls="load" aria-selected="false">Load Query</a>
@@ -148,7 +148,7 @@
 </div>
 
 <!-- Datatable Div -->
-<div class = "container-fluid">
+<div class = "container-fluid" id="DatatableDiv">
 
     <table id="queryTable" class="display">
         <thead id="queryTableHead"></thead>
