@@ -30,8 +30,9 @@ function StudyQuery(name, description, scope, dataModel, SQLquery, domainList, s
     self.rightFile = ko.observable();
 }
 
-
-function SinglepageViewModel() {
+var ViewModel = function () {
+//function SinglepageViewModel() {
+//var VM = function() {
     // Data
     var self = this;
     self.studypathText = ko.observable("C:/CDR/3945/56021927PCR1024/DRMdata/");
@@ -50,7 +51,7 @@ function SinglepageViewModel() {
     self.SQLquery = ko.observable();
     self.links = ko.observableArray([]);
     self.sorts = ko.observableArray([]);
-    self.sqé = new StudyQuery()
+    //self.sqé = new StudyQuery()
     self.sq = new StudyQuery("","",  "", "","", [,],
         [], [,], [,],"" , "" );
 //    self.sortField = ko.observable();
@@ -328,9 +329,10 @@ function SinglepageViewModel() {
 
 }
 
-
-
-ko.applyBindings(new SinglepageViewModel());
+var viewModel = new ViewModel();
+ko.applyBindings(viewModel);
+//ko.applyBindings(new SinglepageViewModel());
+//ko.applyBindings(VM());
 //var firstround = true;
 
 viewQuery = function(queryFile) {
@@ -372,7 +374,22 @@ $(document).ready( function () {
             queryFile: queryFile,
          }).done(function (result, status, xhr) {
                 //alert("full data: " + JSON.stringify(result));
-                alert(JSON.stringify(result))
+                //alert(JSON.stringify(result));
+                viewModel.sq.name(result.name);
+                viewModel.sq.dataModel(result.dataModel);
+                viewModel.sq.scope(result.scope);
+                viewModel.sq.description(result.description);
+                viewModel.sq.rightFile(result.rightFile);
+                viewModel.sq.leftFile(result.leftFile);
+                if (typeof result.sorts != "undefined") {
+                    viewModel.sorts(result.sorts);
+                } else {
+                    viewModel.sorts([]);
+                }
+                viewModel.sq.SQLquery(result.SQLquery);
+                viewModel.sq.selectedFields(result.selectedFields);
+                $('#openModal').modal('toggle');
+
          }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
          });
