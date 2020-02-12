@@ -122,25 +122,12 @@
               <!-- <button type="button" class="btn btn-outline-primary btn-xs"  data-bind="click: function(){ viewQuery('test.json') }">Fix button test</button> -->
               <p></p>
               <ul class="list-group" ></ul>
-              <div class="list-group" id="loadList">
-                  <a href="#" class="list-group-item list-group-item-action active">
-                    Cras justo odio
-                  </a>
-                  <a href="#" class="list-group-item list-group-item-action">Dapibus ac facilisis in</a>
-                  <a href="#" class="list-group-item list-group-item-action">Morbi leo risus</a>
-                  <a href="#" class="list-group-item list-group-item-action">Porta ac consectetur ac</a>
-                  <a href="#" class="list-group-item list-group-item-action disabled">Vestibulum at eros</a>
-              </div>
+              <div class="list-group" id="loadList"></div>
               <p></p>
           </div>
           <div class="tab-pane fade" id="compare" role="tabpanel" aria-labelledby="compare-tab">...</div>
         </div>
     </div>
-
-
-
-
-
 
 
 
@@ -201,6 +188,53 @@
     </div>
   </div>
 </div>
+
+<div id= "openModal" class="modal fade" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Run saved query</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <table width="100%">
+            <tr>
+                <td width="150">Query Name:</td><td>
+                <span data-bind="text: sq.name"></span></td>
+            </tr><tr>
+                <td>Data Model:</td><<td>
+            <span data-bind="text: sq.dataModel"></span></td>
+            </tr><tr>
+                <td>Scope:</td><<td><span data-bind="text: sq.scope"></span>
+                </td>
+            </tr><tr>
+                <td>Description:</td><td><span data-bind="text: sq.description">
+                </span></td>
+            </tr><tr>
+                <td>Left Domain:</td><td><span data-bind="text: sq.leftFile"></span></td>
+            </tr><tr>
+                <td>Right Domain:</td><td><span data-bind="text: sq.rightFile"></span></td>
+            </tr><tr>
+                <td>Selected fields:</td><td><span data-bind="text: sq.selectedFields"></span></td>
+            </tr><tr>
+                <td>Order by:</td><td><span data-bind="text: sorts"></span></td>
+            </tr><tr>
+                <td>SQL:</td><td><span data-bind="text: sq.SQLquery"></td>
+            </tr>
+        </table>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-danger" data-bind="click: runSQLquery">Run query</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
 
 </div> <!-- Ends MasterDiv>
 
