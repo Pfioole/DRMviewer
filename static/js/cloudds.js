@@ -260,6 +260,7 @@ var ViewModel = function () {
             $("#QueryBuilderDiv").addClass('d-none');
             $("#btnEditQuery").removeClass('d-none');
             $("#btnRunQuery").addClass('d-none');
+            $("#openModal .close").click();
         });
         return false;
     }
