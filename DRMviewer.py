@@ -400,10 +400,12 @@ def fetchSQLdata2():
     print("df_left columns:")
     print(cols)
     for i in range(len(cols)):
-        cols[i] = leftDomain + "." + cols[i]
-    #df_left.columns = cols
-    print("df_left columns:")
+        cols[i] = leftDomain + "_" + cols[i]
+    df_left.columns = cols
+    print("df_left columns after the change:")
+    cols = df_left.columns.values.tolist()
     print(cols)
+
     #Extract the subsetted dataset with correct headers
     #domain_subset_fields = subsetfields(leftDomain, subset, df_left)
     #df_left = df_left[domain_subset_fields]
