@@ -43,7 +43,7 @@
                     <div class="container">
                         <div class="row">
                             <div class="col-sm">
-                                <strong>Select left file to merge:</strong></br>
+                                <strong>Select dataset:</strong></br>
                                 <select data-bind="options: datasetsList, value: sq.leftFile, event:{change: fetchLeftFields}" class="form-control" ></select>
 
                                 <label for="colselect">Select Left fields:</label>
@@ -76,7 +76,7 @@
                             </div>
 
                             <div class="col-sm">
-                                <strong>Select right file to merge:</strong></br>
+                                <strong>Select dataset to join:</strong></br>
                                 <select data-bind="options: datasetsList, value: sq.rightFile, event:{change: fetchRightFields}" class="form-control" ></select>
                                 <label for="rightcolselect">Select right fields:</label>
                                 <select data-bind="options: rightFieldList, value: rightField, event:{change: addRightFieldSelect}" id="rightcolselect" class="form-control" name="rightcolselect" size="10"></select>
@@ -137,7 +137,7 @@
 <!-- Datatable Div -->
 <div class = "container-fluid" id="DatatableDiv">
 
-    <table id="queryTable" class="display">
+    <table id="queryTable" class="display table-sm">
         <thead id="queryTableHead"></thead>
     </table>
 </div>

@@ -14,7 +14,6 @@ function Sort(sortField, sortDirection) {
     self.sortDirection = ko.observable("");
 }
 
-
 function StudyQuery(name, description, scope, dataModel, SQLquery, domainList, selectedFields, SQLfieldList, sortFields, leftFile, rightFile) {
     var self = this;
     self.name = ko.observable("");
@@ -138,7 +137,6 @@ var ViewModel = function () {
 
     self.addRightFieldSelect = function() {
         //alert("selected: " + self.rightField());
-        //insert = self.rightFile() + "." + self.rightField();
         self.sq.selectedFields.push(self.rightField());
     }
 
@@ -228,7 +226,8 @@ var ViewModel = function () {
         //self.sq.selectedFields = self.selectedFields();
         //alert("JS sent selected fields : " + self.sq.selectedFields);
         sqstring = JSON.stringify(ko.toJS(self.sq));
-        $.getJSON('/fetchSQLdata', {
+//        $.getJSON('/fetchSQLdata', {
+        $.getJSON('/fetchSQLdata2', {
             studyPath: self.studypathText(),
             sqstring: sqstring
         }, function(data, status, xhr) {
