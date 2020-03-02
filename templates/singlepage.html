@@ -42,42 +42,57 @@
                     <!-- Query building interface -->
                     <div class="container">
                         <div class="row">
+
+                            <!-- COLUMN 1 -->
                             <div class="col-sm">
                                 <strong>Select dataset:</strong></br>
-                                <select data-bind="options: datasetsList, value: sq.leftFile, event:{change: fetchLeftFields}" class="form-control" ></select>
+                                <select data-bind="options: datasetsList, value: leftFile, event:{change: fetchLeftFields}" class="form-control" ></select>
 
                                 <label for="colselect">Select Left fields:</label>
                                 <select data-bind="options: leftFieldList, value: leftField, event:{change: addLeftFieldSelect}" id="leftcolselect" class="form-control" name="leftcolselect" size="10"></select>
+                                <p></p>
+
+                                <button id="btnJoin" type="button" class="btn btn-primary">Join Datasets</button>
+                                <button id="btnSingle" type="button" class="btn btn-primary">Single Dataset</button>
+
                             </div>
 
-                            <div class="col-sm">
-                                <strong>Join:</strong></br>
+                            <!-- COLUMN 2 -->
+                            <div id="joinUI" class="col-sm joindivs">
+
+                                <div><strong>Join:</strong></div></br>
                                 <table class="table table-sm ">
-                                    <th>Type</th><th>Left</th><th>Right</th><th>X</th>
-                                    <tbody data-bind="foreach: links">
+                                    <th>Left dataset</th><th>Join</th><th>Right dataset</th><th></th>
+                                    <tbody>
+                                    <tr>
+                                        <td><input class="form-control form-control-sm" type="text" data-bind="value: leftFile" disabled></td>
                                         <td><select data-bind="options: $root.joinTypes, value: joinType" class="form-control-sm"></select></td>
-                                        <td><select data-bind="options: $root.leftFieldList, value: leftLink" class="form-control-sm"></select></td>
-                                        <td><select data-bind="options: $root.rightFieldList, value: rightLink" class="form-control-sm"></select></td>
+                                        <td><input class="form-control form-control-sm" type="text" data-bind="value: rightFile" disabled></td>
+                                    </tr>
+                                    <!-- <tr>
+                                        <td><select data-bind="options: sq.datasets, value: joinedLeftDS, event:{change: fetchLeftLinkFields}"  class="form-control-sm"></select></td>
+                                        <td><select data-bind="options: $root.joinTypes, value: joinType" class="form-control-sm"></select></td>
+                                        <td><select data-bind="options: sq.datasets, value: joinedRightDS, event:{change: fetchRightLinkFields}" class="form-control-sm"></select></td>
+                                    </tr> -->
+                                    </tbody>
+                                    <tbody data-bind="foreach: links">
+                                        <td><select data-bind="options: $root.leftLinkFieldList, value: leftLink" class="form-control-sm"></select></td>
+                                        <td style="text-align:center"><h6>=</h6></td>
+                                        <td><select data-bind="options: $root.rightLinkFieldList, value: rightLink" class="form-control-sm"></select></td>
                                         <td><a href="#" data-bind="click: $root.removeLink">X</a></td>
                                     </tbody>
                                 </table>
-                                <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addLink">Add Link</button></br></br>
+                                <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addLink">Add Link</button>
+                                </br></br>
 
-                                <strong>order by:</strong></br>
-                                <table class="table table-sm ">
-                                    <th>Field</th><th>Asc/Desc</th><th>X</th>
-                                    <tbody data-bind="foreach: sorts">
-                                        <td><select data-bind="options: $root.sq.selectedFields, value: sortField" class="form-control-sm"></select></td>
-                                        <td><select data-bind="options: $root.sortDirections, value: sortDirection" class="form-control-sm"></select></td>
-                                        <td><a href="#" data-bind="click: $root.removeSort">X</a></td>
-                                    </tbody>
-                                </table>
-                                <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addSort">Add Sorting</button></br>
+
+
                             </div>
 
-                            <div class="col-sm">
+                            <!-- COLUMN 3 -->
+                            <div id="join1" class="col-sm joindivs">
                                 <strong>Select dataset to join:</strong></br>
-                                <select data-bind="options: datasetsList, value: sq.rightFile, event:{change: fetchRightFields}" class="form-control" ></select>
+                                <select data-bind="options: datasetsList, value: rightFile, event:{change: fetchRightFields}" class="form-control" ></select>
                                 <label for="rightcolselect">Select right fields:</label>
                                 <select data-bind="options: rightFieldList, value: rightField, event:{change: addRightFieldSelect}" id="rightcolselect" class="form-control" name="rightcolselect" size="10"></select>
                             </div>
@@ -87,34 +102,40 @@
                     <div class="container">
                         SELECT <span data-bind="text: sq.selectedFields" class="h6"></span> <a href="#" data-bind="click: $root.removeSelectField">X</a>
                     </div>
-                    <div class="container">
-                        from <span class="h6"  data-bind="text: sq.leftFile"></span>
-                        inner join  <span class="h6" data-bind="text: sq.rightFile"> </span>
-                    </div>
-                    <div class="container">
-                        <span data-bind="foreach: links">
-                            ON (<span data-bind="text: leftLink"></span> = <span data-bind="text: rightLink"></span>)</span></br>
-                         </span>
-                    </div>
 
                     <div class="container">
-                        WHERE <input class="form-control" data-bind="value: whereClause" />
+                        <strong>Where: </strong><input class="form-control" data-bind="value: sq.whereClause" />
+                    </div>
+
+                    <!-- ORDER BY -->
+                    <div class="container">
+                        <strong>Order by: </strong>
+                        <select data-bind="options: sq.datasets, value: sortDomain, event:{change: fetchSortFields}" class="form-control-sm" ></select>
+                        <select data-bind="options: sortFieldList, value: sortField" class="form-control-sm" ></select>
+                        <select data-bind="options: $root.sortDirections, value: sortDirection" class="form-control-sm"></select>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addOrderBy">Add</button>
+                        <h5><span data-bind="text: sq.sorts" class="h6"></span> <a href="#" data-bind="click: $root.removeSort2">X</a></h5>
+                        </br>
+                        </br>
+                    </div>
+
+                    <!-- WHERE CLAUSE -->
+                    <div class="container">
+                        ORDER BY <span data-bind="text: sq.sorts" class="h6"></span> <a href="#" data-bind="click: $root.removeSort2">X</a>
                     </div>
 
                 <!-- end of QueryBuilderDiv -->
                 </div>
 
+                <!-- BUTTONS -->
                 <div class="container">
-                <!--
-                        <button class="btn btn-primary btn-success" data-bind="click: runQuery">Run query</button>
-                        <button class="btn btn-danger" data-bind="click: runQuery3">Run query3</button>
-                -->
+
                         <button class="btn btn-secondary" data-bind="click: runQuery4">Run Python query4</button>
-                        <button class="btn btn-danger" id="btnRunQuery" data-bind="click: runSQLquery">Run SQL query</button>
+                        <button class="btn btn-danger" id="btnRunQuery" data-bind="click: runSQLquery">Run SQL query3</button>
                         <button class="btn btn-success d-none" id="btnEditQuery" data-bind="click: editSQLquery">edit SQL query</button>
                         <button class="btn btn-primary" data-bind="click: saveQueryModal">Save query</button>
                 </div>
-
+                <p></p>
 
 
           </div>
@@ -159,24 +180,26 @@
                 <td width="150">Query Name:</td><td>
                 <input class="form-control form-control-sm" type="text" data-bind="value: sq.name"></td>
             </tr><tr>
-                <td>Data Model:</td><<td>
+                <td>Data Model:</td><td>
                 <input class="form-control form-control-sm" type="text" data-bind="value: sq.dataModel"></td>
             </tr><tr>
-                <td>Scope:</td><<td><input class="form-control form-control-sm" type="text" data-bind="value: sq.scope">
+                <td>Scope:</td><td><input class="form-control form-control-sm" type="text" data-bind="value: sq.scope">
                 </td>
             </tr><tr>
                 <td>Description:</td><td><textarea class="form-control" rows="3" data-bind="value: sq.description">
                 </textarea></td>
             </tr><tr>
-                <td>Left Domain:</td><td><span data-bind="text: sq.leftFile"></span></td>
+                <td>Datasets:</td><td><span data-bind="text: sq.datasets"></span></td>
             </tr><tr>
-                <td>Right Domain:</td><td><span data-bind="text: sq.rightFile"></span></td>
+                <td>Left Domain:</td><td><span data-bind="text: leftFile"></span></td>
+            </tr><tr>
+                <td>Right Domain:</td><td><span data-bind="text: rightFile"></span></td>
             </tr><tr>
                 <td>Selected fields:</td><td><span data-bind="text: sq.selectedFields"></span></td>
             </tr><tr>
-                <td>Order by:</td><td><span data-bind="text: sorts"></span></td>
+                <td>Order by:</td><td><span data-bind="text: sq.sorts"></span></td>
             </tr><tr>
-                <td>SQL:</td><td><span data-bind="text: sq.SQLquery"></td>
+                <td>SQL:</td><td><span data-bind="text: sq.SQLquery" /></td>
             </tr>
         </table>
 
@@ -213,13 +236,17 @@
                 <td>Description:</td><td><span data-bind="text: sq.description">
                 </span></td>
             </tr><tr>
-                <td>Left Domain:</td><td><span data-bind="text: sq.leftFile"></span></td>
+                <td>Domains:</td><td><span data-bind="text: sq.datasets"></span></td>
             </tr><tr>
-                <td>Right Domain:</td><td><span data-bind="text: sq.rightFile"></span></td>
+                <td>Left Domain:</td><td><span data-bind="text: leftFile"></span></td>
+            </tr><tr>
+                <td>Right Domain:</td><td><span data-bind="text: rightFile"></span></td>
             </tr><tr>
                 <td>Selected fields:</td><td><span data-bind="text: sq.selectedFields"></span></td>
             </tr><tr>
-                <td>Order by:</td><td><span data-bind="text: sorts"></span></td>
+                <td>Order by:</td><td><span data-bind="text: sq.sortFields"></span></td>
+            </tr><tr>
+                <td>Where:</td><td><span data-bind="text: sq.whereClause"></span></td>
             </tr><tr>
                 <td>SQL:</td><td><span data-bind="text: sq.SQLquery"></td>
             </tr>

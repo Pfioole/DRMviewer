@@ -209,6 +209,7 @@ def fetchdatasets():
 @app.route('/fetchfields', methods=['GET'])
 def fetchfields():
     studyPath = request.args.get('studyPath')
+    origin = request.args.get('origin')
     selectedFile = request.args.get('selectedDomain') + ".sas7Bdat"
     if (studyPath[-1:] not in ["/", "\\"]):
         studyPath = studyPath + "/"
@@ -217,7 +218,8 @@ def fetchfields():
     df_ds = pd.read_sas(filePath, format='sas7bdat', encoding = 'iso-8859-1')
     npcols = df_ds.columns.values
     cols = npcols.tolist()
-    cols.insert(0, "*")
+    if origin != "sort" :
+        cols.insert(0, "*")
     fieldlistDict = {}
     fieldlistDict["fieldList"] = cols
     return jsonify(fieldlistDict)
@@ -508,6 +510,158 @@ def fetchSQLdata2():
     jsonTable = jsonTable.replace(findRight, replaceRight)
     #dict_sq["cols"] = cols
     print(jsonTable)
+
+    return jsonTable
+
+@app.route('/fetchSQLdata3', methods=['GET'])
+def fetchSQLdata3():
+    studyPath = request.args.get('studyPath')
+    sqstring = request.args.get('sqstring')
+    sqDict = json.loads(sqstring)
+    datasets = sqDict["datasets"]
+    leftDomain = datasets[0]
+    if len(datasets) > 1 :
+        rightDomain = datasets[1]
+    subset = sqDict["selectedFields"]
+    q = sqDict["SQLquery"]
+
+    #print(sqDict)
+
+    # leftDomain = sqDict["leftFile"]
+    # rightDomain = sqDict["rightFile"]
+    subset = sqDict["selectedFields"]
+    q = sqDict["SQLquery"]
+
+    #print("subset: ")
+    #print(subset)
+
+    dataframes = []
+
+    #datasets = []
+    # Populating the datasets array (strings AE, MEDHIST, ...)
+    #datasets.append(leftDomain)
+    #if rightDomain:
+    #    datasets.append(rightDomain)
+
+    print("Datasets:")
+    print(datasets)
+
+    for i in range(len(datasets)):
+        if i == 0:
+            df_0 = load_dataframe(datasets[i], studyPath)
+            print("Loaded df:" + datasets[i])
+            print(df_0.head())
+        if i == 1:
+            df_1 = load_dataframe(datasets[i], studyPath)
+            print("Loaded df:" + datasets[i])
+            print(df_1.head())
+        if i == 2:
+            df_2 = load_dataframe(datasets[i], studyPath)
+            print("Loaded df:" + datasets[i])
+            print(df_2.head())
+        if i == 3:
+            df_3 = load_dataframe(datasets[i], studyPath)
+            print("Loaded df:" + datasets[i])
+            print(df_3.head())
+
+    for i in range(len(datasets)):
+        dfname = "df_" + str(i)
+        print(dfname)
+        q = pandaSQLcleanquery(q, datasets[i], dfname)
+
+    print(q)
+
+    df_ds = psql.sqldf(q, locals())
+    print("Joined dataframe df_ds:")
+    print(df_ds.head())
+
+    cols_in = []
+    for item in subset:
+        cols_in.append(item)
+    cols_out = []
+    for domain in datasets:
+        selectall = domain + ".*"
+        # print("selectall: " + selectall)
+        # print("cols in: ")
+        # print(cols_in)
+        cols_out = []
+        # print("cols_out at start of dataset:")
+        # print(cols_out)
+        domain_any = domain + "."
+        for item in cols_in:
+            if item == selectall:
+                max = len(datasets)
+                if max > 0:
+                    if domain == datasets[0]:
+                        npcols = df_0.columns.values
+                if max > 1:
+                    if domain == datasets[1]:
+                        npcols = df_1.columns.values
+                if max > 2:
+                    if domain == datasets[2]:
+                        npcols = df_2.columns.values
+                if max > 3:
+                    if domain == datasets[3]:
+                        npcols = df_3.columns.values
+                allfields = npcols.tolist()
+                # print("all fields from source domain:")
+                # print(allfields) # = list(df_left.columns.values)
+                for element in allfields:
+                    cols_out.append(domain_any + element)
+            else:
+                cols_out.append(item)
+        cols_in = []
+        for item in cols_out:
+            cols_in.append(item)
+    print("cols_out")
+    print(cols_out)
+
+    print(df_ds.columns)
+    df_ds.columns = cols_out
+    df_ds.head()
+
+    # Datacleaning steps
+
+    # Convert Timestamps to date format that can be serialized in JSON
+    for (y) in df_ds:
+        if (df_ds[y].dtype == "datetime64[ns]"):
+            df_ds[y] = df_ds[y].map(lambda y: pd.Timestamp(y, unit='ms'))
+            df_ds[y] = df_ds[y].map(lambda y: y if (pd.isnull(y)) else y.strftime("%Y/%m/%d"))
+            df_ds[y] = df_ds[y].astype('str')
+
+    # Fill empty fields
+    df_ds = df_ds.fillna("None")
+    df_ds = df_ds  # .head(4)
+    print(df_ds.head())
+
+    dict_sq = {}
+    dict_ds = df_ds.to_dict(orient='records')
+    dict_sq["data"] = dict_ds
+
+    #    subset = sqDict["selectedFields"]
+    cols = []
+    coldefs = []
+    for columnnr in range(len(cols_out)):
+        cols.append({})
+        cols[columnnr]["data"] = cols_out[columnnr]
+        coldefs.append({})
+        coldefs[columnnr]["title"] = cols_out[columnnr]
+        coldefs[columnnr]["targets"] = columnnr
+    dict_sq["cols"] = cols
+    dict_sq["coldefs"] = coldefs
+
+    # print(json.dumps(dict_sq))
+    jsonTable = json.dumps(dict_sq, default=strconverter)
+    print(jsonTable)
+    findLeft = leftDomain + "."
+    replaceLeft = leftDomain + "_"
+    findRight = rightDomain + "."
+    replaceRight = rightDomain + "_"
+    jsonTable = jsonTable.replace(findLeft, replaceLeft)
+    jsonTable = jsonTable.replace(findRight, replaceRight)
+    # dict_sq["cols"] = cols
+
+    #print(jsonTable)
 
     return jsonTable
 
