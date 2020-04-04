@@ -12,6 +12,9 @@ from flask import escape
 import numpy as np
 
 app = Flask(__name__)
+#for ElasticBeanstalk:
+# application = app = Flask(__name__)
+
 app.secret_key = os.urandom(24)
 
 # bootstrap = Bootstrap(app)
@@ -836,4 +839,5 @@ def dscombinedviewer():
                            the_folder=session['datafolder'])
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    # app.run(debug=True)
+    app.run(host='0.0.0.0')

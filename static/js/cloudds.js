@@ -511,11 +511,13 @@ $(document).ready( function () {
                 viewModel.sq.description(result.description);
                 datasets = result.datasets;
                 viewModel.leftFile(datasets[0]);
+                viewModel.fetchLeftFields();
                 if (datasets.length >1) {
                     viewModel.rightFile(datasets[1]);
                 } else {
                     viewModel.rightFile(datasets[0]);
                 }
+                viewModel.fetchRightFields();
                 //viewModel.rightFile(result.rightFile);
                 //viewModel.leftFile(result.leftFile);
                 viewModel.sq.datasets(result.datasets);

@@ -100,7 +100,12 @@
                     </div>
 
                     <div class="container">
-                        SELECT <span data-bind="text: sq.selectedFields" class="h6"></span> <a href="#" data-bind="click: $root.removeSelectField">X</a>
+                        <strong>Select</strong>
+                        <table class="table table-bordered table-sm">
+                            <tr><td>
+                                <span data-bind="text: sq.selectedFields" class="h6"></span> <a href="#" data-bind="click: $root.removeSelectField">X</a>
+                            </td></tr>
+                        </table>
                     </div>
 
                     <div class="container">
