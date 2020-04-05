@@ -1,4 +1,4 @@
-from DRMviewer import app
+from DRMviewer import app as application
 
 if __name__ == "__main__":
-        app.run()
+        application.run()
