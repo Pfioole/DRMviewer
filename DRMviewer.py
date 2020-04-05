@@ -189,7 +189,7 @@ def entry_page() -> 'html':
 def singlepage() -> 'html':
     path = "C:/CDR/3945/56021927PCR1024/DRMdata/"
     return render_template('singlepage.html',
-                           the_title='DRM viewer', the_path=path)
+                           the_title='DRM viewer')
 
 @app.route('/fetchdatasets', methods=['GET'])
 def fetchdatasets():
@@ -840,4 +840,4 @@ def dscombinedviewer():
 
 if __name__ == '__main__':
     # app.run(debug=True)
-    app.run(host='0.0.0.0')
+    app.run(host='0.0.0.0', debug=True)
