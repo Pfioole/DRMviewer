@@ -25,10 +25,23 @@ app.secret_key = os.urandom(24)
 def load_dataframe(domain, studyPath):
     if (studyPath[-1:] not in ["/", "\\"]):
         studyPath = studyPath + "/"
-    filefolder = studyPath + domain + ".sas7Bdat"
+    datapath = Path(studyPath)
+
+    filelist = os.listdir(datapath)
+    _file_to_load = ""
+    for filename in filelist:
+        if '.sas7bdat' in filename:
+            _listed_domain = os.path.splitext(filename)[0].upper()
+            if domain == _listed_domain:
+                _file_to_load = filename
+
+#    filefolder = studyPath + domain + ".sas7Bdat"
+    filefolder = studyPath + _file_to_load
     FilePath = Path(filefolder)
     df_domain = pd.read_sas(FilePath, format='sas7bdat', encoding='iso-8859-1')
     return df_domain
+
+# domain = os.path.splitext(filename)[0].upper()
 
 def subsetfields(domain, subset, df):
     domain_subset_fields = []
@@ -187,7 +200,7 @@ def entry_page() -> 'html':
 
 @app.route('/singlepage')
 def singlepage() -> 'html':
-    path = "C:/CDR/3945/56021927PCR1024/DRMdata/"
+    # path = "C:/CDR/3945/56021927PCR1024/DRMdata/"
     return render_template('singlepage.html',
                            the_title='DRM viewer')
 
@@ -213,12 +226,17 @@ def fetchdatasets():
 def fetchfields():
     studyPath = request.args.get('studyPath')
     origin = request.args.get('origin')
-    selectedFile = request.args.get('selectedDomain') + ".sas7Bdat"
-    if (studyPath[-1:] not in ["/", "\\"]):
-        studyPath = studyPath + "/"
-    filefolder = studyPath + selectedFile
-    filePath = Path(filefolder)
-    df_ds = pd.read_sas(filePath, format='sas7bdat', encoding = 'iso-8859-1')
+    domain = request.args.get('selectedDomain')
+#    selectedFile = request.args.get('selectedDomain') + ".sas7Bdat"
+#    if (studyPath[-1:] not in ["/", "\\"]):
+#        studyPath = studyPath + "/"
+#    filefolder = studyPath + selectedFile
+#    filePath = Path(filefolder)
+
+    domain = request.args.get('selectedDomain')
+    df_ds = load_dataframe(domain, studyPath)
+
+#    df_ds = pd.read_sas(filePath, format='sas7bdat', encoding = 'iso-8859-1')
     npcols = df_ds.columns.values
     cols = npcols.tolist()
     if origin != "sort" :
