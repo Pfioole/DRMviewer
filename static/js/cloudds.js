@@ -55,7 +55,7 @@ var ViewModel = function () {
 //var VM = function() {
     // Data
     var self = this;
-    self.studypathText = ko.observable("C:/CDR/3945/56021927PCR1024/DRMdata/");
+    self.studypathText = ko.observable();
     self.datasetsList = ko.observableArray();
     self.datasetsLijst = [];
     self.leftFile = ko.observable();
@@ -462,41 +462,30 @@ ko.applyBindings(viewModel);
 viewQuery = function(queryFile) {
         alert("queryfile : " + queryFile);
 
-
-
     }
 
 
 let data = {};
-/*
-let data = { "content" :
-                [
-                    {
-                        "SITEID":		"Tiger",
-                        "STUDYID":	"Architect",
-                        "SUBJID":     "NaN"
-                    },
-                    {
-                        "SUBJID":       "123",
-                        "SITEID":		"Garret",
-                        "STUDYID":	"Director"
-                    }
-                ],
-			"cols" :
-				[
-				    {data: "SITEID"},
-					{data: "STUDYID"},
-                    {data: "SUBJID"}
-				]
-};
 
- */
 //var qTable = $('#queryTable').DataTable() ;
 
 $(document).ready( function () {
 
     $(".joindivs").hide();
     $("#btnSingle").hide();
+
+    $.getJSON("/fetchCDRpath", {
+        //studyPath: self.studypathText(),
+        //selectedDomain: self.sortDomain(),
+        //origin: "sort"
+    }).done(function (result, status, xhr) {
+        viewModel.studypathText(result.CDRpath);
+    }).fail(function (xhr, status, error) {
+        alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+    });
+
+
+
 
     $(document).on("click", ".viewQuery", function() {
         var queryFile = $(this).attr("id");

@@ -204,6 +204,18 @@ def singlepage() -> 'html':
     return render_template('singlepage.html',
                            the_title='DRM viewer')
 
+
+@app.route('/fetchCDRpath', methods=['GET'])
+def fetchCDRpath():
+    file = request.args.get('queryFile')
+    filepath = "./serverparams.json"
+    #session['datafolder'] = studyPath
+    with open(filepath) as json_file:
+        queryJSON = json.load(json_file)
+    print(queryJSON)
+    return jsonify(queryJSON)
+
+
 @app.route('/fetchdatasets', methods=['GET'])
 def fetchdatasets():
     studyPath = request.args.get('studyPath')
@@ -708,7 +720,7 @@ def fetchQueries():
     #session['datafolder'] = studyPath
 
     filelist = os.listdir(datafolder)
-    print(filelist)
+    # print(filelist)
     filelistDict = {}
     filelistDict["queryList"] = filelist
     return jsonify(filelistDict)
@@ -720,7 +732,7 @@ def fetchQueryContent():
     #session['datafolder'] = studyPath
     with open(filepath) as json_file:
         queryJSON = json.load(json_file)
-    print(queryJSON)
+    # print(queryJSON)
     return jsonify(queryJSON)
 
 #######################################################################################
