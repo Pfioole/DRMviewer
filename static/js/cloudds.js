@@ -37,9 +37,7 @@ function StudyQuery(name, description, scope, dataModel, SQLquery, selectedField
     self.scope = ko.observable();
     self.dataModel = ko.observable();
     self.SQLquery = ko.observable("");
-    //self.domainList =  ko.observableArray();
     self.selectedFields = ko.observableArray();
-    //self.SQLfieldList = ko.observableArray();
     self.whereClause = ko.observable("");
     self.sorts = ko.observableArray();
     self.sortFields = ko.observableArray();
@@ -47,13 +45,9 @@ function StudyQuery(name, description, scope, dataModel, SQLquery, selectedField
     self.rightFile = ko.observable();
     self.datasets = ko.observableArray();
     self.joins = ko.observableArray();
-
 }
 
 var ViewModel = function () {
-//function SinglepageViewModel() {
-//var VM = function() {
-    // Data
     var self = this;
     self.studypathText = ko.observable();
     self.datasetsList = ko.observableArray();
@@ -64,7 +58,6 @@ var ViewModel = function () {
     self.rightFieldList = ko.observable();
     self.leftField = ko.observable();
     self.rightField = ko.observable();
-    //self.selectedFields = ko.observableArray();
     self.joinTypes = ["INNER JOIN", "OUTER JOIN", "LEFT JOIN"];
     self.sortDirections = ["ASC", "DESC"];
     self.sortDomain = ko.observable();
@@ -77,13 +70,8 @@ var ViewModel = function () {
     self.links = ko.observableArray();   //can be removed?
     self.leftLinkFieldList = ko.observableArray();
     self.rightLinkFieldList = ko.observableArray();
-    //self.whereClause = ko.observable("");
-    //self.SQLquery = ko.observable();
-    //self.sorts = ko.observableArray([]);
     self.sq = new StudyQuery("","",  "", "","", [,],
          "", [],[],"" , "" , [], []);
-
-
 
     // Operations
     self.fetchDatasets = function() {
@@ -110,13 +98,11 @@ var ViewModel = function () {
             selectedDomain: self.leftFile(),
         }).done(function (result, status, xhr) {
             lijst = result.fieldList;
-            for (i=0; i < lijst.length; i++) {
+ //           for (i=0; i < lijst.length; i++) {
                 // lijst[i] = self.sq.leftFile() + "." + lijst[i];
-            }
+ //           }
             self.links.removeAll();
-
             self.leftFieldList(lijst);
-
             self.sq.sorts.removeAll();
             self.sq.selectedFields.removeAll();
             if (self.sq.datasets().length < 1) {
@@ -129,7 +115,6 @@ var ViewModel = function () {
             for (i=1; i < lijst.length; i++) {
                 self.leftLinkFieldList.push(lijst[i]);
             }
-
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
@@ -201,23 +186,18 @@ var ViewModel = function () {
         });
     }
 
-
     self.addLink = function() {
         self.links.push(new Link("", ""));
-        //alert("array: " + self.links()[0].toString());
     };
 
     self.addNewLink = function(leftlink, rightlink) {
         self.links.push(new Link(leftlink, rightlink));
-        //alert("array: " + self.links()[0].toString());
     };
 
     self.createJoin = function() {
         self.sq.joins.removeAll();
         newJoin1 = new Join(self.leftFile(), self.joinType(), self.rightFile(), self.links())
         self.sq.joins.push(newJoin1);
-        //alert(self.sq.joins()[0].joinedLeftDS);
-        //alert(self.sq.joins()[0].links[0].leftLink());
     }
 
     this.leftDomainField = ko.computed(function() {
@@ -251,7 +231,7 @@ var ViewModel = function () {
         if ((joinLength > 0) && (self.leftFile() !== self.rightFile())) {
             self.createJoin();
             linksLength = self.sq.joins()[0].links.length;
-            alert("self.buildSQLstring linkslength: " + linksLength);
+            //alert("self.buildSQLstring linkslength: " + linksLength);
 
             joinText = " " + self.sq.joins()[0].joinType + " " + self.sq.joins()[0].joinedRightDS + " ON (" +
                 self.sq.joins()[0].joinedLeftDS + "." + self.sq.joins()[0].links[0].leftLink() + " = "
@@ -361,15 +341,7 @@ var ViewModel = function () {
                 data: data.data,
                 columnDefs: data.coldefs
             });
-            /*
-            headings = "<tr>";
-	        for (i=0; i< data.cols.length; i++) {
-		        headings += "<th>" + data.cols[i].data + "</th>"
-                //headings += "<th>" + result.cols[i] + "</th>"
-	        }
-	        headings += "</tr>";
-	        $("#queryTableHead").html(headings);
-            */
+
             $("#DatatableDiv").removeClass('d-none');
             $("#QueryBuilderDiv").addClass('d-none');
             $("#btnEditQuery").removeClass('d-none');
@@ -416,23 +388,17 @@ var ViewModel = function () {
 
                 element = '<a href="#" class="list-group-item list-group-item-action viewQuery" id="' + list[i] + '">' +
                     list[i] + '</a>'
-
-                //element = '<li class="list-group-item viewQuery" id="' +
-                  //  list[i] + '">' + list[i]+ '</li>'
                 $("#loadList").append(element);
             }
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
     }
-
-    self.test = function(){
-        alert("TEST OK!");
-    }
+/*
     self.viewQuery = function(queryFile) {
         alert("queryfile : " + queryFile);
     }
-
+*/
     self.removeLink = function(link) {
         self.links.remove(link);
     }
@@ -455,19 +421,14 @@ var ViewModel = function () {
 
 var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
-//ko.applyBindings(new SinglepageViewModel());
-//ko.applyBindings(VM());
-//var firstround = true;
 
+/*
 viewQuery = function(queryFile) {
         alert("queryfile : " + queryFile);
-
     }
-
+*/
 
 let data = {};
-
-//var qTable = $('#queryTable').DataTable() ;
 
 $(document).ready( function () {
 
@@ -475,21 +436,15 @@ $(document).ready( function () {
     $("#btnSingle").hide();
 
     $.getJSON("/fetchCDRpath", {
-        //studyPath: self.studypathText(),
-        //selectedDomain: self.sortDomain(),
-        //origin: "sort"
+        //??: ??,
     }).done(function (result, status, xhr) {
         viewModel.studypathText(result.CDRpath);
     }).fail(function (xhr, status, error) {
         alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
     });
 
-
-
-
     $(document).on("click", ".viewQuery", function() {
         var queryFile = $(this).attr("id");
-
         $.getJSON("/fetchQueryContent", {
             queryFile: queryFile,
          }).done(function (result, status, xhr) {
@@ -566,10 +521,7 @@ $(document).ready( function () {
                     viewModel.sq.joins.removeAll();
                     //alert("All joins removed as the joins object was undefined")
                 }
-
-
                 //alert( "SQ object at end: " + viewModel.makeString(viewModel.sq));
-
                 viewModel.sq.SQLquery(result.SQLquery);
                 viewModel.sq.selectedFields(result.selectedFields);
 
@@ -609,12 +561,6 @@ $(document).ready( function () {
         viewModel.sq.selectedFields.removeAll();
         //viewModel.sq.datasets.length = 1; //remove all datasets except the leftFile
     });
-
-        //$("#btnJoinToggle").button('toggle')
-        //[DIV].style.visibility='visible'
-        //[DIV].style.visibility='hidden'
-        //$(elem).hide();
-        //$(elem).show();
 
 } );
 
