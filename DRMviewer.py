@@ -9,8 +9,7 @@ from pymongo import MongoClient
 from bson import json_util
 from bson.json_util import dumps
 from bson.json_util import loads
-from bson import Binary, Code
-import ast
+
 
 
 from pathlib import Path
