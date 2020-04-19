@@ -1,12 +1,24 @@
-from flask import Flask, render_template, request, escape, Markup, session, jsonify
+from flask import Flask, render_template, request, escape, Markup, session, jsonify, abort, Response
+from flask import make_response, url_for
 # from flask_bootstrap import Bootstrap
 import pandas as pd
 import pandasql as psql
+
+from pymongo import MongoClient
+
+from bson import json_util
+from bson.json_util import dumps
+from bson.json_util import loads
+from bson import Binary, Code
+import ast
+
 
 from pathlib import Path
 import os
 import json
 import datetime
+
+
 
 # from flask import escape
 # import numpy as np
@@ -14,6 +26,8 @@ import datetime
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
 
+# connection to MongoDB Database
+connection = MongoClient("mongodb://localhost:27017/")
 
 def load_dataframe(domain, studyPath):
     if (studyPath[-1:] not in ["/", "\\"]):
@@ -77,6 +91,45 @@ def strconverter(o):
     if isinstance(o, datetime.datetime):
         return o.__str__()
 
+
+# Initialize Database
+def create_mongodatabase():
+    print("ok, in the function")
+    try:
+        dbnames = connection.list_database_names()
+        print(dbnames)
+        if 'cloudds' not in dbnames:
+            db_queries = connection.cloudds.queries
+
+            db_queries.insert({
+            "name": "AE - all fields",
+            "description": "Dataset contains all Adverse Events",
+            "scope": "Global",
+            })
+
+            print ("Database Initialize completed!")
+        else:
+            print ("Database already Initialized!")
+    except:
+        print ("Database creation failed!!")
+    print(dbnames)
+
+
+def add_query(new_query):
+    api_list = []
+    print(new_query)
+    db = connection.cloudds.queries
+    same_queries = db.find({"name": new_query['name']})
+    for i in same_queries:
+        print(str(i))
+        api_list.append(str(i))
+    # print (api_list)
+    if api_list == []:
+        #    print(new_user)
+        db.insert(new_query)
+        return "Success"
+    else:
+        abort(409)
 ####################################################################################################
 
 @app.route('/')
@@ -316,8 +369,23 @@ def saveQuery():
     queryFile = open(filepath, "w")
     queryFile.write(prettySQstring)
     queryFile.close()
+    return jsonify({'status': 'query saved as file'}), 201
 
-    return prettySQstring
+@app.route('/add_Mongo_query', methods=['POST'])
+def add_Mongo_query():
+    if not request.json:
+        abort(400)
+    print(type(request.json))
+    sqDict = request.json
+    #sqDict = json.loads(sqstring)
+    #print(sqDict["name"])
+#    query = {
+#        "name" : request.json["name"],
+#        'description': request.json['description'],
+#        'scope': request.json['scope']
+#    }
+    return jsonify({'status' : add_query(sqDict)}), 201
+
 
 @app.route('/fetchQueries', methods=['GET'])
 def fetchQueries():
@@ -327,6 +395,64 @@ def fetchQueries():
     filelistDict = {}
     filelistDict["queryList"] = filelist
     return jsonify(filelistDict)
+
+
+@app.route('/searchMongo', methods=['GET'])
+def searchMongo():
+    api_list = []
+    test_list = []
+    oldapi_list = []
+    db = connection.cloudds.queries
+
+    searchString = request.args.get('searchString')
+    print(searchString)
+    sqDict = json.loads(searchString)
+    print("sqDict: ")
+    print(sqDict)
+    search_Dict = {}
+    if "name" in sqDict:
+        _name_substring = (sqDict["name"]) + ".*/"
+        #_searchTerm = '$regex: "\\/.*' + sqDict["name"] + '.*/i"'
+        name_substring = "/^" + sqDict["name"] + "$/i" # /^bar$/i
+        # query = {"$regex": '/.*' +_name_substring}
+        name_substring = sqDict["name"]
+        query = {"$regex":  name_substring}
+        search_Dict["name"] = query
+    if sqDict["dataModel"]:
+        if sqDict["dataModel"] != "":
+            search_Dict["dataModel"] = sqDict["dataModel"]
+    if "description" in sqDict:
+        name_substring = sqDict["description"]
+        query = {"$regex":  name_substring}
+        search_Dict["description"] = query
+    if sqDict["scope"]:
+        if sqDict["scope"] != "":
+            search_Dict["scope"] = sqDict["scope"]
+    if sqDict["status"]:
+        if sqDict["status"] != "":
+            search_Dict["status"] = sqDict["status"]
+    print(search_Dict)
+
+    for row in db.find(search_Dict):
+        strrow = (dumps(row))     #conversions to get clean JSON from Mongo BSON
+        dictrow = (loads(strrow)) #conversions to get clean JSON from Mongo BSON
+#        print(type(dictrow))       #type is dict
+#        test_list.append(strrow)
+        api_list.append(dictrow)
+#        oldapi_list.append(str(row))
+#    print(test_list)
+    print(api_list)
+#    print(oldapi_list)
+    #print(jsonify({'query_list': api_list}))
+    #return jsonify({'query_list' : api_list})
+    #s = jsonify({'query_list' : api_list})
+    #s = {'query_list': api_list}
+    #s = ast.literal_eval(s)
+    #print (s)
+    #return s
+    # return jsonify({'query_list' : oldapi_list})
+    return Response(dumps({'query_list' : api_list}, default=json_util.default), mimetype='application/json') #this one worked!
+
 
 @app.route('/fetchQueryContent', methods=['GET'])
 def fetchQueryContent():
@@ -338,7 +464,29 @@ def fetchQueryContent():
     # print(queryJSON)
     return jsonify(queryJSON)
 
+
+# Error handling
+@app.errorhandler(404)
+def resource_not_found(error):
+    return make_response(jsonify({'error': 'Resource not found!'}), 404)
+
+
+@app.errorhandler(409)
+def user_found(error):
+    return make_response(jsonify({'error': 'Conflict! Record exist'}), 409)
+
+
+@app.errorhandler(400)
+def invalid_request(error):
+    return make_response(jsonify({'error': 'Bad Request'}), 400)
+
+
+
 #######################################################################################
 
+
 if __name__ == '__main__':
+    print("pre the function")
+    create_mongodatabase()
+    print("post the function")
     app.run(host='0.0.0.0', debug=True)

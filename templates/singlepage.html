@@ -2,7 +2,7 @@
 
 {% block page_content %}
 
-<div class="container">
+<div id="divPath" class="container">
     <div class="row"><div class="col">Study Dataset Path: </div></div>
     <div class="row">
       <div class="col-9"><input class="form-control" data-bind="value: studypathText"/></div>
@@ -18,7 +18,7 @@
     <!-- Tabs for Create Query and Re-Use Query -->
 
 
-    <div class="container">
+    <div id="divNavtabs" class="container">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item">
             <a class="nav-link active" data-bind="click: editSQLquery" id="edit-tab" data-toggle="tab" href="#editTab" role="tab" aria-controls="editTab" aria-selected="true">Build Query</a>
@@ -27,7 +27,7 @@
             <a class="nav-link " data-bind="click: loadQueries" id="load-tab" data-toggle="tab" href="#load" role="tab" aria-controls="load" aria-selected="false">Load Query</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="compare-tab" data-toggle="tab" href="#compare" role="tab" aria-controls="compare" aria-selected="false">Compare Files</a>
+            <a class="nav-link" id="search-tab" data-toggle="tab" href="#divSearchMongo" role="tab" aria-controls="divSearchMongo" aria-selected="false">Search queries in Mongo</a>
           </li>
         </ul>
 
@@ -108,11 +108,12 @@
                         </table>
                     </div>
 
+                    <!-- WHERE CLAUSE -->
                     <div class="container">
                         <strong>Where: </strong><input class="form-control" data-bind="value: sq.whereClause" />
                     </div>
 
-                    <!-- ORDER BY -->
+                    <!-- SORTING -->
                     <div class="container">
                         <strong>Order by: </strong>
                         <select data-bind="options: sq.datasets, value: sortDomain, event:{change: fetchSortFields}" class="form-control-sm" ></select>
@@ -124,7 +125,7 @@
                         </br>
                     </div>
 
-                    <!-- WHERE CLAUSE -->
+                    <!-- ORDERBY LIST -->
                     <div class="container">
                         ORDER BY <span data-bind="text: sq.sorts" class="h6"></span> <a href="#" data-bind="click: $root.removeSort2">X</a>
                     </div>
@@ -135,10 +136,14 @@
                 <!-- BUTTONS -->
                 <div class="container">
 
-                        <button class="btn btn-secondary" data-bind="click: runQuery4">Run Python query4</button>
+                        <button disabled class="btn btn-secondary" data-bind="click: runQuery4">Run Python query4</button>
                         <button class="btn btn-danger" id="btnRunQuery" data-bind="click: runSQLquery">Run SQL query3</button>
                         <button class="btn btn-success d-none" id="btnEditQuery" data-bind="click: editSQLquery">edit SQL query</button>
                         <button class="btn btn-primary" data-bind="click: saveQueryModal">Save query</button>
+
+
+
+
                 </div>
                 <p></p>
 
@@ -151,7 +156,56 @@
               <div class="list-group" id="loadList"></div>
               <p></p>
           </div>
-          <div class="tab-pane fade" id="compare" role="tabpanel" aria-labelledby="compare-tab">...</div>
+          <div class="tab-pane fade" id="divSearchMongo" role="tabpanel" aria-labelledby="search-tab">
+                    <p></p>
+                      <table>
+                            <tr>
+                                <td width="200">Name contains:</td>
+                                <td><input class="form-control form-control-sm" type="text"
+                                           data-bind="value: searchQuery.name" width="200"></td>
+                            </tr><tr>
+                                <td>Data Model:</td>
+                                <td><select data-bind="options: $root.dataModels, value: searchQuery.dataModel"
+                                            class="form-control-sm"  width="200" /></td>
+                            </tr><tr>
+                                <td>Scope:</td>
+                                <td><select data-bind="options: $root.scopes, value: searchQuery.scope"
+                                            class="form-control-sm" /></td>
+                            </tr><tr>
+                                  <td>Description contains:</td>
+                                  <td><input class="form-control form-control-sm" type="text"
+                                           data-bind="value: searchQuery.description"></td>
+                            </tr><tr>
+                                <td>Author:</td>
+                                </td><td><input class="form-control form-control-sm" type="text"
+                                           data-bind="value: searchQuery.author"></td>
+                            </tr>
+                            </tr><tr>
+                                <td>Status:</td>
+                                </td><td><select data-bind="options: $root.statuses, value: searchQuery.status"
+                                            class="form-control-sm" /></td>
+                            </tr>
+                            <tr><td></td>
+                              <td><button type="button" class="btn btn-success btn-sm" data-bind="click: searchMongo">
+                                  Search</button></td></tr>
+                      </table>
+
+                    <table class="table-sm table-bordered">
+                        <thead><th>Query Name</th><th>Data Model</th><th>Description</th><th>Scope</th>
+                            <th>Status</th><th>Author</th><th>View</th></thead>
+                        <tbody data-bind="foreach: query_list, visible: query_list().length > 0">
+                            <td data-bind="text: name"></td>
+                            <td data-bind="text: dataModel"></td>
+                            <td data-bind="text: description"></td>
+                            <td data-bind="text: scope"></td>
+                            <td data-bind="text: status"></td>
+                            <td data-bind="text: author"></td>
+                            <td><a href="#" data-bind="click: $root.viewMongoQuery">View</a></td>
+                        </tbody>
+                    </table>
+
+
+          </div>
         </div>
     </div>
 
@@ -169,7 +223,6 @@
 </div>
 
 <!-- Modal to show the save pop-up -->
-
 <div id= "saveModal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -186,9 +239,11 @@
                 <input class="form-control form-control-sm" type="text" data-bind="value: sq.name"></td>
             </tr><tr>
                 <td>Data Model:</td><td>
-                <input class="form-control form-control-sm" type="text" data-bind="value: sq.dataModel"></td>
+                    <select data-bind="options: $root.dataModels, value: sq.dataModel" class="form-control-sm" />
+                </td>
             </tr><tr>
-                <td>Scope:</td><td><input class="form-control form-control-sm" type="text" data-bind="value: sq.scope">
+                <td>Scope:</td><td>
+                    <select data-bind="options: $root.scopes, value: sq.scope" class="form-control-sm" />
                 </td>
             </tr><tr>
                 <td>Description:</td><td><textarea class="form-control" rows="3" data-bind="value: sq.description">
@@ -211,12 +266,14 @@
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-primary" data-bind="click: saveQuery">Save query</button>
+        <button type="button" class="btn btn-primary" data-bind="click: add_Mongo_query">Add to MongoDB</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- Modal to show the open-run pop-up -->
 <div id= "openModal" class="modal fade" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg" role="document">
     <div class="modal-content">
@@ -259,7 +316,7 @@
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-danger" data-bind="click: runSQLquery">Run query</button>
+        <button type="button" class="btn btn-danger" data-bind="click: runSQLquery">Run SQL query</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>

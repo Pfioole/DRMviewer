@@ -45,6 +45,40 @@ function StudyQuery(name, description, scope, dataModel, SQLquery, selectedField
     self.rightFile = ko.observable();
     self.datasets = ko.observableArray();
     self.joins = ko.observableArray();
+    //self._id = {};
+
+}
+
+function InputQuery(name, description, scope, dataModel, SQLquery, selectedFields,  whereClause, sorts,
+                    sortFields, leftFile, rightFile, datasets, joins) {
+    var self = this;
+    self.name = "";
+    self.description = "";
+    self.scope = "";
+    self.dataModel = "";
+    self.status = "";
+    self.author = "";
+    self.SQLquery = "";
+    self.selectedFields = [];
+    self.whereClause = "";
+    self.sorts = [];
+    self.sortFields = [];
+    self.leftFile = "";
+    self.rightFile = "";
+    self.datasets = [];
+    self.joins = [];
+    //self._id = {};
+
+}
+
+function SearchQuery(name, description, scope, dataModel, author, status, _id) {
+    self.name = ko.observable("");
+    self.description = ko.observable("");
+    self.scope = ko.observable("");
+    self.dataModel = ko.observable("");
+    self.author = ko.observable("");
+    self.status = ko.observable("");
+    self._id = {};
 }
 
 var ViewModel = function () {
@@ -72,6 +106,12 @@ var ViewModel = function () {
     self.rightLinkFieldList = ko.observableArray();
     self.sq = new StudyQuery("","",  "", "","", [,],
          "", [],[],"" , "" , [], []);
+
+    self.searchQuery = new SearchQuery("", "", "", "", "", "", {});
+    self.dataModels = ["", "SDTM", "DRM", "Other"];
+    self.statuses = ["", "Personal", "Development", "In Test", "Approved"];
+    self.scopes = ["", "Global", "Neurosciences", "Oncology", "Immunology", "CVM", "IDV", "PHA"];
+    self.query_list = ko.observableArray([]);
 
     // Operations
     self.fetchDatasets = function() {
@@ -146,6 +186,23 @@ var ViewModel = function () {
         });
     }
 
+    self.adapt_domain_field_list= function(domain, side) {
+        $.getJSON("/fetchfields", {
+            studyPath: self.studypathText(),
+            selectedDomain: domain
+            //selectedDomain: self.leftFile(),
+        }).done(function (result, status, xhr) {
+            lijst = result.fieldList;
+            if (side = "left") {
+                self.leftFieldList(lijst);
+            } else {
+                self.rightFieldList(lijst);
+            }
+            //self.addLink();
+        }).fail(function (xhr, status, error) {
+            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+        });
+    }
 
      self.fetchLeftLinkFields = function() {
         $.getJSON("/fetchfields", {
@@ -247,6 +304,7 @@ var ViewModel = function () {
         } else {
             joinText = "";
         }
+        console.log("BuildQuery jointext :"  + joinText);
 
         if ((self.sq.whereClause() !== "") && (typeof self.sq.whereClause() !== "undefined")) {
             //if  (self.sq.whereClause().length >0) {
@@ -255,13 +313,17 @@ var ViewModel = function () {
         } else {
             whereSQL = "";
         }
+        console.log("BuildQuery whereclause :"  + whereSQL);
+
 
         if (self.sq.selectedFields().length == 0) {
             self.sq.selectedFields.push(self.leftFile() + ".*")
-        }
-        ;
+        };
         selection = self.sq.selectedFields().toString();
         selection = selection.replace(/,/g, "\, ");  //in order to add a blank after each comma for readability
+
+        console.log("BuildQuery sql selection(fields) :"  + selection);
+
 
         if (typeof self.sq.sorts() != "undefined") {
              if (self.sq.sorts().length != 0) {
@@ -276,6 +338,7 @@ var ViewModel = function () {
 
         SQLquery = "SELECT " + selection + " FROM " + self.leftFile() + joinText + whereSQL + orderBy + ";";
         //self.SQLquery(SQLquery);
+        console.log("BuildQuery sql query :"  + SQLquery);
         self.sq.SQLquery(SQLquery);
     }
 
@@ -317,11 +380,13 @@ var ViewModel = function () {
     }
 
     self.runSQLquery = function() {
+        console.log("sq.selectedFields at start of runSQLquery :" + self.sq.selectedFields());
+        console.log("sq.SQLquery at start of runSQLquery :" + self.sq.SQLquery());
         self.buildSQLstring();
         //self.sq.selectedFields = self.selectedFields();
         //alert("JS sent selected fields : " + self.sq.selectedFields);
         sqstring = JSON.stringify(ko.toJS(self.sq));
-//        $.getJSON('/fetchSQLdata', {
+
         $.getJSON('/fetchSQLdata3', {
             studyPath: self.studypathText(),
             sqstring: sqstring
@@ -342,6 +407,8 @@ var ViewModel = function () {
                 columnDefs: data.coldefs
             });
 
+//            viewModel.adapt_domain_field_list(self.leftFile(), "left");
+//            viewModel.adapt_domain_field_list(self.rightFile(), "right");
             $("#DatatableDiv").removeClass('d-none');
             $("#QueryBuilderDiv").addClass('d-none');
             $("#btnEditQuery").removeClass('d-none');
@@ -374,6 +441,50 @@ var ViewModel = function () {
         });
     }
 
+    self.add_Mongo_query = function() {
+	    sqstring = JSON.stringify(ko.toJS(self.sq));
+	    //alert(sqstring);
+        return $.ajax({
+            url: '/add_Mongo_query',
+            contentType: 'application/json',
+            type: 'POST',
+            data: sqstring,
+	    success: function(data) {
+            alert("query successfully added to the database")
+            console.log("query successfully added to the database");
+            $('#saveModal').modal('toggle');
+		    return;
+	    },
+	    error: function() {
+            alert("Failed to add the query to the database: Query Name already exists");
+		    return console.log("Failed to add the query to the database");
+	    }
+	});
+    };
+
+    self.searchMongo = function() {
+        let searchString = JSON.stringify(ko.toJS(self.searchQuery));
+        $.getJSON("/searchMongo", {
+            searchString: searchString //{"test":"test"},
+        }).done(function (result, status, xhr) {
+            //alert("JS received data: " + JSON.stringify(result));
+
+            var t = $.map(result.query_list, function(item) {
+	            currentQuery = new InputQuery();
+	            returned = Object.assign(currentQuery, item);
+                return returned;
+	        });
+            //self.query_list(result.query_list);
+            console.log(JSON.stringify(returned));
+            self.query_list(t);
+            console.log(JSON.stringify(self.query_list()));
+            //alert(JSON.stringify(result.query_list[0].name));
+
+        }).fail(function (xhr, status, error) {
+            alert("Error retrieving AJAX data: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+        });
+    }
+
     self.loadQueries = function() {
         $("#DatatableDiv").addClass('d-none');
         sqstring = JSON.stringify(ko.toJS(self.sq));
@@ -384,7 +495,7 @@ var ViewModel = function () {
             list = result["queryList"]
             $("#loadList").html("");
 
-            for (i=0; i<list.length; i++ ) {
+            for (i = 0; i < list.length; i++) {
 
                 element = '<a href="#" class="list-group-item list-group-item-action viewQuery" id="' + list[i] + '">' +
                     list[i] + '</a>'
@@ -394,11 +505,13 @@ var ViewModel = function () {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
     }
-/*
-    self.viewQuery = function(queryFile) {
-        alert("queryfile : " + queryFile);
+
+    self.viewMongoQuery = function(mongoQuery) {
+        console.log("Selected entry from Mongo query_list: " + JSON.stringify(mongoQuery));
+        viewQueryFunction(mongoQuery);
+        //alert(mongoQuery.name);
     }
-*/
+
     self.removeLink = function(link) {
         self.links.remove(link);
     }
@@ -415,12 +528,109 @@ var ViewModel = function () {
         return JSON.stringify(ko.toJS(KOobject));
     }
 
-
-
 }
 
 var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
+
+function viewQueryFunction(result) {
+    //alert("full data: " + JSON.stringify(result));
+    viewModel.sq.name(result.name);
+    viewModel.sq.dataModel(result.dataModel);
+    //alert(result.dataModel());
+    viewModel.sq.scope(result.scope);
+    viewModel.sq.description(result.description);
+    datasets = result.datasets;
+    viewModel.leftFile(datasets[0]);
+    // viewModel.fetchLeftFields(); /////////////////////////////needs completion!!!!!!!!!!!!!!!!!!!!
+    if (datasets.length >1) {
+        viewModel.rightFile(datasets[1]);
+    } else {
+        viewModel.rightFile(datasets[0]);
+    }
+    // viewModel.fetchRightFields(); ////////////////////////////needs completion!!!!!!!!!!!!!!!!!!!!!
+    //viewModel.rightFile(result.rightFile);
+    //viewModel.leftFile(result.leftFile);
+    viewModel.sq.datasets(result.datasets);
+    if (typeof result.whereClause != "undefined") {
+        viewModel.sq.whereClause(result.whereClause);
+    } else {
+        viewModel.sq.whereClause("");
+    }
+    viewModel.sq.sortFields.removeAll();
+    if (typeof result.sortFields != "undefined") {
+        for (var i = 0; i < result.sortFields.length; i++) {
+            viewModel.sq.sortFields.push(new Sort(result.sortFields[i].sortField, result.sortFields[i].sortDirection));
+        }
+    } else {
+        alert (" sortFields undefined ");
+        viewModel.sq.sortFields([]);
+    }
+    viewModel.sq.sorts.removeAll();
+    if (typeof result.sorts != "undefined") {
+         for (var i = 0; i < result.sorts.length; i++) {
+            viewModel.sq.sorts.push(result.sorts[i]);
+        }
+    } else {
+        alert (" sorts undefined ");
+        viewModel.sq.sorts([]);
+    }
+    //viewModel.sq.sorts(result.sorts);
+
+    if (typeof result.joins != "undefined") {
+        //alert( "SQ object before: " + viewModel.makeString(viewModel.sq));
+        viewModel.sq.joins.removeAll();
+        viewModel.links.removeAll();
+        //alert( "SQ object after join removal: " + viewModel.makeString(viewModel.sq));
+        for (var i = 0; i < result.joins.length; i++) {
+            links = [];
+            listedlinks = [];
+            for (var j = 0; j < result.joins[i].links.length ; j++) {
+                leftlink = result.joins[i].links[j].leftLink;
+                rightlink = result.joins[i].links[j].rightLink;
+                link = new Link(leftlink, rightlink);
+                listedlink = new Listedlink(leftlink, rightlink);
+                var newlink = new Link(leftlink, rightlink);
+                listedlinks.push(listedlink);
+
+                viewModel.addLink();
+                viewModel.links()[j].leftLink(leftlink);
+                viewModel.links()[j].rightLink(rightlink);
+
+            }
+            join = new Join( result.joins[i].joinedLeftDS,
+                            result.joins[i].joinType,
+                            result.joins[i].joinedRightDS,
+                            listedlinks);
+            viewModel.sq.joins.push(join);
+        }
+    } else {
+        viewModel.sq.joins.removeAll();
+        //alert("All joins removed as the joins object was undefined")
+    }
+    //alert( "SQ object at end: " + viewModel.makeString(viewModel.sq));
+    viewModel.sq.SQLquery(result.SQLquery);
+    viewModel.sq.selectedFields(result.selectedFields);
+    console.log("ViewQueryFunction sq.selectedFields : " + viewModel.sq.selectedFields());
+
+    //Prepare the query edit view to fit either single table or joined tables
+    if (viewModel.sq.joins().length > 0) {
+        $(".joindivs").show();
+        $("#btnSingle").show();
+        $("#btnJoin").hide();
+        //viewModel.createJoin();
+    } else {
+        $(".joindivs").hide();
+        $("#btnJoin").show();
+        $("#btnSingle").hide();
+        //viewModel.links.removeAll();
+    }
+    $('#openModal').modal('toggle');
+    console.log(JSON.stringify("sq.SQLquery formed from load query: " + viewModel.sq.SQLquery()));
+    console.log(JSON.stringify("sq.selectedFields formed selected fields: " + viewModel.sq.selectedFields()));
+}
+
+
 
 /*
 viewQuery = function(queryFile) {
@@ -448,7 +658,10 @@ $(document).ready( function () {
         $.getJSON("/fetchQueryContent", {
             queryFile: queryFile,
          }).done(function (result, status, xhr) {
-                //alert("full data: " + JSON.stringify(result));
+                alert("full data: " + JSON.stringify(result));
+
+                viewQueryFunction(result);
+/*
                 viewModel.sq.name(result.name);
                 viewModel.sq.dataModel(result.dataModel);
                 viewModel.sq.scope(result.scope);
@@ -538,11 +751,16 @@ $(document).ready( function () {
                     //viewModel.links.removeAll();
                 }
                 $('#openModal').modal('toggle');
-
+*/
          }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
          });
     })
+
+    $('#openModal').on('hidden.bs.modal', function () {
+            viewModel.adapt_domain_field_list(viewModel.leftFile(), "left");
+            viewModel.adapt_domain_field_list(viewModel.rightFile(), "right");
+    });
 
     $("#btnJoin").click(function(){
         $(".joindivs").show();
