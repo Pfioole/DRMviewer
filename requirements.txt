@@ -3,4 +3,4 @@ pandas
 flask
 gunicorn
 numpy
-bson.json_util
+pymongo
