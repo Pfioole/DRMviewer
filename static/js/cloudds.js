@@ -29,13 +29,15 @@ function Sort(sortField, sortDirection) {
     self.sortDirection = ko.observable("");
 }
 
-function StudyQuery(name, description, scope, dataModel, SQLquery, selectedFields,  whereClause, sorts,
-                    sortFields, leftFile, rightFile, datasets, joins) {
+function StudyQuery(name, description, scope, dataModel, status, author, SQLquery, selectedFields,  whereClause, sorts,
+                    sortFields, leftFile, rightFile, datasets, joins, limit, _id) {
     var self = this;
     self.name = ko.observable("");
     self.description = ko.observable();
     self.scope = ko.observable();
     self.dataModel = ko.observable();
+    self.status = ko.observable();
+    self.author = ko.observable("");
     self.SQLquery = ko.observable("");
     self.selectedFields = ko.observableArray();
     self.whereClause = ko.observable("");
@@ -45,12 +47,13 @@ function StudyQuery(name, description, scope, dataModel, SQLquery, selectedField
     self.rightFile = ko.observable();
     self.datasets = ko.observableArray();
     self.joins = ko.observableArray();
-    //self._id = {};
+    self.limit = ko.observable(10000);
+    self._id = {};
 
 }
 
 function InputQuery(name, description, scope, dataModel, SQLquery, selectedFields,  whereClause, sorts,
-                    sortFields, leftFile, rightFile, datasets, joins) {
+                    sortFields, leftFile, rightFile, datasets, joins, limit, _id) {
     var self = this;
     self.name = "";
     self.description = "";
@@ -67,7 +70,8 @@ function InputQuery(name, description, scope, dataModel, SQLquery, selectedField
     self.rightFile = "";
     self.datasets = [];
     self.joins = [];
-    //self._id = {};
+    self.limit = 10000;
+    self._id = {};
 
 }
 
@@ -105,7 +109,8 @@ var ViewModel = function () {
     self.leftLinkFieldList = ko.observableArray();
     self.rightLinkFieldList = ko.observableArray();
     self.sq = new StudyQuery("","",  "", "","", [,],
-         "", [],[],"" , "" , [], []);
+         "", [],[],"" , "" , [], [],
+        [], [], 10000);
 
     self.searchQuery = new SearchQuery("", "", "", "", "", "", {});
     self.dataModels = ["", "SDTM", "DRM", "Other"];
@@ -336,7 +341,13 @@ var ViewModel = function () {
              orderBy = "";
         }
 
-        SQLquery = "SELECT " + selection + " FROM " + self.leftFile() + joinText + whereSQL + orderBy + ";";
+        if (self.sq.limit().length != 0) {
+            limit = " LIMIT " + self.sq.limit().toString();
+        } else {
+            limit = "";
+        }
+
+        SQLquery = "SELECT " + selection + " FROM " + self.leftFile() + joinText + whereSQL + orderBy + limit + ";";
         //self.SQLquery(SQLquery);
         console.log("BuildQuery sql query :"  + SQLquery);
         self.sq.SQLquery(SQLquery);
@@ -472,6 +483,7 @@ var ViewModel = function () {
             var t = $.map(result.query_list, function(item) {
 	            currentQuery = new InputQuery();
 	            returned = Object.assign(currentQuery, item);
+	            //alert(JSON.stringify(returned));
                 return returned;
 	        });
             //self.query_list(result.query_list);
@@ -512,6 +524,11 @@ var ViewModel = function () {
         //alert(mongoQuery.name);
     }
 
+    self.deleteMongoQuery = function(mongoQuery) {
+        // console.log("To be deleted entry from Mongo query_list: " + JSON.stringify(mongoQuery));
+        deleteQueryFunction(mongoQuery);
+    }
+
     self.removeLink = function(link) {
         self.links.remove(link);
     }
@@ -533,13 +550,39 @@ var ViewModel = function () {
 var viewModel = new ViewModel();
 ko.applyBindings(viewModel);
 
+function deleteQueryFunction(mongoQuery) {
+    let delete_id = JSON.stringify(mongoQuery._id);
+    // alert(delete_id);
+
+    return $.ajax({
+        url: '/Mongo_query',
+        contentType: 'application/json',
+        type: 'DELETE',
+        data: delete_id,
+        success: function (response) {
+            alert( response.ok + " of " + response.n + " query succesfully deleted from the database")
+            console.log( response.ok + " of " + response.n + " query succesfully deleted from the database");
+            //$('#saveModal').modal('toggle');
+            viewModel.searchMongo();
+            return;
+        },
+        error: function () {
+            alert("Failed to delete the query from the database");
+            return console.log("Failed to delete the query from the database");
+        }
+
+    })
+}
+
+
 function viewQueryFunction(result) {
     //alert("full data: " + JSON.stringify(result));
     viewModel.sq.name(result.name);
-    viewModel.sq.dataModel(result.dataModel);
-    //alert(result.dataModel());
-    viewModel.sq.scope(result.scope);
     viewModel.sq.description(result.description);
+    viewModel.sq.scope(result.scope);
+    viewModel.sq.dataModel(result.dataModel);
+    viewModel.sq.status(result.status);
+    viewModel.sq.author(result.author);
     datasets = result.datasets;
     viewModel.leftFile(datasets[0]);
     // viewModel.fetchLeftFields(); /////////////////////////////needs completion!!!!!!!!!!!!!!!!!!!!
@@ -608,10 +651,15 @@ function viewQueryFunction(result) {
         viewModel.sq.joins.removeAll();
         //alert("All joins removed as the joins object was undefined")
     }
+    if (typeof result.limit != "undefined") {
+        viewModel.sq.limit(result.limit);
+    } else {
+        viewModel.sq.limit(10000);
+    }
     //alert( "SQ object at end: " + viewModel.makeString(viewModel.sq));
     viewModel.sq.SQLquery(result.SQLquery);
     viewModel.sq.selectedFields(result.selectedFields);
-    console.log("ViewQueryFunction sq.selectedFields : " + viewModel.sq.selectedFields());
+    //console.log("ViewQueryFunction sq.selectedFields : " + viewModel.sq.selectedFields());
 
     //Prepare the query edit view to fit either single table or joined tables
     if (viewModel.sq.joins().length > 0) {
@@ -630,15 +678,7 @@ function viewQueryFunction(result) {
     console.log(JSON.stringify("sq.selectedFields formed selected fields: " + viewModel.sq.selectedFields()));
 }
 
-
-
-/*
-viewQuery = function(queryFile) {
-        alert("queryfile : " + queryFile);
-    }
-*/
-
-let data = {};
+let data = {};  //declaration of object to be used for datatables content
 
 $(document).ready( function () {
 
@@ -659,99 +699,7 @@ $(document).ready( function () {
             queryFile: queryFile,
          }).done(function (result, status, xhr) {
                 alert("full data: " + JSON.stringify(result));
-
                 viewQueryFunction(result);
-/*
-                viewModel.sq.name(result.name);
-                viewModel.sq.dataModel(result.dataModel);
-                viewModel.sq.scope(result.scope);
-                viewModel.sq.description(result.description);
-                datasets = result.datasets;
-                viewModel.leftFile(datasets[0]);
-                viewModel.fetchLeftFields();
-                if (datasets.length >1) {
-                    viewModel.rightFile(datasets[1]);
-                } else {
-                    viewModel.rightFile(datasets[0]);
-                }
-                viewModel.fetchRightFields();
-                //viewModel.rightFile(result.rightFile);
-                //viewModel.leftFile(result.leftFile);
-                viewModel.sq.datasets(result.datasets);
-                if (typeof result.whereClause != "undefined") {
-                    viewModel.sq.whereClause(result.whereClause);
-                } else {
-                    viewModel.sq.whereClause("");
-                }
-                viewModel.sq.sortFields.removeAll();
-                if (typeof result.sortFields != "undefined") {
-                    for (var i = 0; i < result.sortFields.length; i++) {
-                        viewModel.sq.sortFields.push(new Sort(result.sortFields[i].sortField, result.sortFields[i].sortDirection));
-                    }
-                } else {
-                    alert (" sortFields undefined ");
-                    viewModel.sq.sortFields([]);
-                }
-                viewModel.sq.sorts.removeAll();
-                if (typeof result.sorts != "undefined") {
-                     for (var i = 0; i < result.sorts.length; i++) {
-                        viewModel.sq.sorts.push(result.sorts[i]);
-                    }
-                } else {
-                    alert (" sorts undefined ");
-                    viewModel.sq.sorts([]);
-                }
-                //viewModel.sq.sorts(result.sorts);
-
-                if (typeof result.joins != "undefined") {
-                    //alert( "SQ object before: " + viewModel.makeString(viewModel.sq));
-                    viewModel.sq.joins.removeAll();
-                    viewModel.links.removeAll();
-                    //alert( "SQ object after join removal: " + viewModel.makeString(viewModel.sq));
-                    for (var i = 0; i < result.joins.length; i++) {
-                        links = [];
-                        listedlinks = [];
-                        for (var j = 0; j < result.joins[i].links.length ; j++) {
-                            leftlink = result.joins[i].links[j].leftLink;
-                            rightlink = result.joins[i].links[j].rightLink;
-                            link = new Link(leftlink, rightlink);
-                            listedlink = new Listedlink(leftlink, rightlink);
-                            var newlink = new Link(leftlink, rightlink);
-                            listedlinks.push(listedlink);
-
-                            viewModel.addLink();
-                            viewModel.links()[j].leftLink(leftlink);
-                            viewModel.links()[j].rightLink(rightlink);
-
-                        }
-                        join = new Join( result.joins[i].joinedLeftDS,
-                                        result.joins[i].joinType,
-                                        result.joins[i].joinedRightDS,
-                                        listedlinks);
-                        viewModel.sq.joins.push(join);
-                    }
-                } else {
-                    viewModel.sq.joins.removeAll();
-                    //alert("All joins removed as the joins object was undefined")
-                }
-                //alert( "SQ object at end: " + viewModel.makeString(viewModel.sq));
-                viewModel.sq.SQLquery(result.SQLquery);
-                viewModel.sq.selectedFields(result.selectedFields);
-
-                //Prepare the query edit view to fit either single table or joined tables
-                if (viewModel.sq.joins().length > 0) {
-                    $(".joindivs").show();
-                    $("#btnSingle").show();
-                    $("#btnJoin").hide();
-                    //viewModel.createJoin();
-                } else {
-                    $(".joindivs").hide();
-                    $("#btnJoin").show();
-                    $("#btnSingle").hide();
-                    //viewModel.links.removeAll();
-                }
-                $('#openModal').modal('toggle');
-*/
          }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
          });

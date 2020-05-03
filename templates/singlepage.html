@@ -21,13 +21,13 @@
     <div id="divNavtabs" class="container">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item">
-            <a class="nav-link active" data-bind="click: editSQLquery" id="edit-tab" data-toggle="tab" href="#editTab" role="tab" aria-controls="editTab" aria-selected="true">Build Query</a>
+              <a class="nav-link active" data-bind="click: editSQLquery" id="edit-tab" data-toggle="tab" href="#editTab" role="tab" aria-controls="editTab" aria-selected="true"><h3>Build Query</h3></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link " data-bind="click: loadQueries" id="load-tab" data-toggle="tab" href="#load" role="tab" aria-controls="load" aria-selected="false">Load Query</a>
+              <a class="nav-link " data-bind="click: loadQueries" id="load-tab" data-toggle="tab" href="#load" role="tab" aria-controls="load" aria-selected="false"><h3>Load Query from file</h3></a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" id="search-tab" data-toggle="tab" href="#divSearchMongo" role="tab" aria-controls="divSearchMongo" aria-selected="false">Search queries in Mongo</a>
+              <a class="nav-link" id="search-tab" data-toggle="tab" href="#divSearchMongo" role="tab" aria-controls="divSearchMongo" aria-selected="false"><h3>Search queries in Mongo</h3></a>
           </li>
         </ul>
 
@@ -130,6 +130,12 @@
                         ORDER BY <span data-bind="text: sq.sorts" class="h6"></span> <a href="#" data-bind="click: $root.removeSort2">X</a>
                     </div>
 
+                    <!-- LIMIT -->
+                    <div class="container">
+                        <strong>Limit: </strong><input class="form-control" data-bind="value: sq.limit" />
+                    </div>
+
+
                 <!-- end of QueryBuilderDiv -->
                 </div>
 
@@ -192,7 +198,7 @@
 
                     <table class="table-sm table-bordered">
                         <thead><th>Query Name</th><th>Data Model</th><th>Description</th><th>Scope</th>
-                            <th>Status</th><th>Author</th><th>View</th></thead>
+                            <th>Status</th><th>Author</th><th>View</th><th>Delete</th></thead>
                         <tbody data-bind="foreach: query_list, visible: query_list().length > 0">
                             <td data-bind="text: name"></td>
                             <td data-bind="text: dataModel"></td>
@@ -201,6 +207,7 @@
                             <td data-bind="text: status"></td>
                             <td data-bind="text: author"></td>
                             <td><a href="#" data-bind="click: $root.viewMongoQuery">View</a></td>
+                            <td><a href="#" data-bind="click: $root.deleteMongoQuery">Delete</a></td>
                         </tbody>
                     </table>
 
@@ -246,6 +253,13 @@
                     <select data-bind="options: $root.scopes, value: sq.scope" class="form-control-sm" />
                 </td>
             </tr><tr>
+                <td>Status:</td><td>
+                    <select data-bind="options: $root.statuses, value: sq.status" class="form-control-sm" />
+                </td>
+            </tr><tr>
+                <td width="150">Author:</td><td>
+                <input class="form-control form-control-sm" type="text" data-bind="value: sq.author"></td>
+            </tr><tr>
                 <td>Description:</td><td><textarea class="form-control" rows="3" data-bind="value: sq.description">
                 </textarea></td>
             </tr><tr>
@@ -259,14 +273,16 @@
             </tr><tr>
                 <td>Order by:</td><td><span data-bind="text: sq.sorts"></span></td>
             </tr><tr>
+                <td>Limit:</td><td><span data-bind="text: sq.limit" /></td>
+            </tr><tr>
                 <td>SQL:</td><td><span data-bind="text: sq.SQLquery" /></td>
             </tr>
         </table>
 
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" data-bind="click: saveQuery">Save query</button>
-        <button type="button" class="btn btn-primary" data-bind="click: add_Mongo_query">Add to MongoDB</button>
+        <button type="button" class="btn btn-primary" data-bind="click: saveQuery">Save to file</button>
+        <button type="button" class="btn btn-primary" data-bind="click: add_Mongo_query">Save to MongoDB</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
       </div>
     </div>

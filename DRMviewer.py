@@ -10,7 +10,7 @@ from bson import json_util
 from bson.json_util import dumps
 from bson.json_util import loads
 
-
+from bson.objectid import ObjectId
 
 from pathlib import Path
 import os
@@ -125,10 +125,24 @@ def add_query(new_query):
     # print (api_list)
     if api_list == []:
         #    print(new_user)
+        del new_query["_id"] # make sure mongodb assigns it's own unique _id
         db.insert(new_query)
         return "Success"
     else:
         abort(409)
+
+def delete_query(_deleteDict):
+    db = connection.cloudds.queries
+    _id = _deleteDict['$oid']
+    print(_id)
+    # db.remove({"_id": _objectID})
+    # db.remove({"_id" : _deleteDict})
+    result = db.delete_one({'_id' : ObjectId(_id)})
+    # print(result.deleted_count)
+    # print(result.raw_result)
+    # print(result.acknowledged)
+    return (result.raw_result)
+
 ####################################################################################################
 
 @app.route('/')
@@ -385,6 +399,16 @@ def add_Mongo_query():
 #    }
     return jsonify({'status' : add_query(sqDict)}), 201
 
+@app.route('/Mongo_query', methods=['DELETE'])
+def delete_Mongo_query():
+    if not request.json:
+        abort(400)
+    print(type(request.json))
+    _deleteDict = request.json
+    print("_deleteDict string: ")
+    print (_deleteDict)
+    return jsonify(delete_query(_deleteDict)), 202
+
 
 @app.route('/fetchQueries', methods=['GET'])
 def fetchQueries():
@@ -430,6 +454,9 @@ def searchMongo():
     if sqDict["status"]:
         if sqDict["status"] != "":
             search_Dict["status"] = sqDict["status"]
+    if "author" in sqDict:
+        if sqDict["author"] != "":
+            search_Dict["author"] = sqDict["author"]
     print(search_Dict)
 
     for row in db.find(search_Dict):
