@@ -75,14 +75,14 @@ function InputQuery(name, description, scope, dataModel, SQLquery, selectedField
 
 }
 
-function SearchQuery(name, description, scope, dataModel, author, status, _id) {
+function SearchQuery(name, description, scope, dataModel, author, status) {
+    var self = this;
     self.name = ko.observable("");
     self.description = ko.observable("");
     self.scope = ko.observable("");
     self.dataModel = ko.observable("");
     self.author = ko.observable("");
     self.status = ko.observable("");
-    self._id = {};
 }
 
 var ViewModel = function () {
@@ -111,8 +111,7 @@ var ViewModel = function () {
     self.sq = new StudyQuery("","",  "", "","", [,],
          "", [],[],"" , "" , [], [],
         [], [], 10000);
-
-    self.searchQuery = new SearchQuery("", "", "", "", "", "", {});
+    self.searchQuery = new SearchQuery("", "", "", "", "", "");
     self.dataModels = ["", "SDTM", "DRM", "Other"];
     self.statuses = ["", "Personal", "Development", "In Test", "Approved"];
     self.scopes = ["", "Global", "Neurosciences", "Oncology", "Immunology", "CVM", "IDV", "PHA"];
@@ -312,7 +311,11 @@ var ViewModel = function () {
         console.log("BuildQuery jointext :"  + joinText);
 
         if ((self.sq.whereClause() !== "") && (typeof self.sq.whereClause() !== "undefined")) {
-            //if  (self.sq.whereClause().length >0) {
+            console.log("before \" replacement");
+            console.log(self.sq.whereClause())
+            self.sq.whereClause(self.sq.whereClause().replace(/"/g, "'"));
+            console.log("after \" replacement");
+            console.log(self.sq.whereClause())
             whereSQL = " WHERE " + self.sq.whereClause();
             //alert(whereSQL)
         } else {
@@ -487,7 +490,7 @@ var ViewModel = function () {
                 return returned;
 	        });
             //self.query_list(result.query_list);
-            console.log(JSON.stringify(returned));
+            // console.log(JSON.stringify(returned));
             self.query_list(t);
             console.log(JSON.stringify(self.query_list()));
             //alert(JSON.stringify(result.query_list[0].name));
@@ -495,6 +498,15 @@ var ViewModel = function () {
         }).fail(function (xhr, status, error) {
             alert("Error retrieving AJAX data: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
+    }
+
+    self.clearMongoFilter = function() {
+        self.searchQuery.name("");
+        self.searchQuery.description("");
+        self.searchQuery.dataModel("");
+        self.searchQuery.scope("");
+        self.searchQuery.status("");
+        self.searchQuery.author("");
     }
 
     self.loadQueries = function() {
@@ -529,6 +541,12 @@ var ViewModel = function () {
         deleteQueryFunction(mongoQuery);
     }
 
+    self.viewJSONmodal = function(mongoQuery) {
+        _pretty = JSON.stringify(mongoQuery, undefined, 4)
+        $("#JSONprettyPrint").html(_pretty);
+        $('#prettyPrintModal').modal('toggle');
+    }
+
     self.removeLink = function(link) {
         self.links.remove(link);
     }
@@ -553,7 +571,6 @@ ko.applyBindings(viewModel);
 function deleteQueryFunction(mongoQuery) {
     let delete_id = JSON.stringify(mongoQuery._id);
     // alert(delete_id);
-
     return $.ajax({
         url: '/Mongo_query',
         contentType: 'application/json',
@@ -573,7 +590,6 @@ function deleteQueryFunction(mongoQuery) {
 
     })
 }
-
 
 function viewQueryFunction(result) {
     //alert("full data: " + JSON.stringify(result));
