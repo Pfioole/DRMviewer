@@ -17,6 +17,8 @@ import os
 import json
 import datetime
 
+import pyreadstat
+
 
 
 # from flask import escape
@@ -43,6 +45,7 @@ def load_dataframe(domain, studyPath):
     FilePath = Path(filefolder)
     df_domain = pd.read_sas(FilePath, format='sas7bdat', encoding='iso-8859-1')
     return df_domain
+
 
 
 def subsetfields(domain, subset, df):
@@ -143,6 +146,33 @@ def delete_query(_deleteDict):
     # print(result.acknowledged)
     return (result.raw_result)
 
+
+def fetchMetadata(_study_path):
+    # _study_path = request.args.get('studyPath')
+    if (_study_path[-1:] not in ["/", "\\"]):
+        _study_path = _study_path + "/"
+    session['datafolder'] = _study_path
+    _file_list = os.listdir(Path(_study_path))
+    metadata = {}
+    domains = []
+    for _filename in _file_list:
+        if '.sas7bdat' in _filename:
+            domain = os.path.splitext(_filename)[0].upper()
+            domains.append(domain)
+            _file_folder = _study_path + _filename
+            df, meta = pyreadstat.read_sas7bdat(_file_folder, metadataonly=True)
+            _domain_metadata = {}
+            _domain_metadata["column_names"] = meta.column_names
+            _domain_metadata["column_labels"] = meta.column_labels
+            _domain_metadata["column_names_to_labels"] = meta.column_names_to_labels
+            _domain_metadata["number_rows"] = meta.number_rows
+            _domain_metadata["number_columns"] = meta.number_columns
+            _domain_metadata["file_label"] = meta.file_label
+            _domain_metadata["file_encoding"] = meta.file_encoding
+            _domain_metadata["variable_storage_width"] = meta.variable_storage_width
+            metadata[domain] = _domain_metadata
+    metadata["domains"] = domains
+    return(metadata)
 ####################################################################################################
 
 @app.route('/')
@@ -162,6 +192,10 @@ def fetchCDRpath():
         queryJSON = json.load(json_file)
     return jsonify(queryJSON)
 
+@app.route('/getMetadata', methods=['GET'])
+def getMetadata():
+    studyPath = request.args.get('studyPath')
+    return jsonify(fetchMetadata(studyPath))
 
 @app.route('/fetchdatasets', methods=['GET'])
 def fetchdatasets():

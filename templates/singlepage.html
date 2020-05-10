@@ -21,14 +21,18 @@
     <div id="divNavtabs" class="container">
         <ul class="nav nav-tabs" id="myTab" role="tablist">
           <li class="nav-item">
-              <a class="nav-link active" data-bind="click: editSQLquery" id="edit-tab" data-toggle="tab" href="#editTab" role="tab" aria-controls="editTab" aria-selected="true"><h3>Build Query</h3></a>
+              <a class="nav-link active" data-bind="click: editSQLquery" id="edit-tab" data-toggle="tab" href="#editTab" role="tab" aria-controls="editTab" aria-selected="true"><h5>Build Query</h5></a>
           </li>
           <li class="nav-item">
-              <a class="nav-link " data-bind="click: loadQueries" id="load-tab" data-toggle="tab" href="#load" role="tab" aria-controls="load" aria-selected="false"><h3>Load Query from file</h3></a>
+              <a class="nav-link " data-bind="click: loadQueries" id="load-tab" data-toggle="tab" href="#load" role="tab" aria-controls="load" aria-selected="false"><h5>Load Query from file</h5></a>
           </li>
           <li class="nav-item">
-              <a class="nav-link" id="search-tab" data-toggle="tab" href="#divSearchMongo" role="tab" aria-controls="divSearchMongo" aria-selected="false"><h3>Search queries in Mongo</h3></a>
+              <a class="nav-link" id="search-tab" data-toggle="tab" href="#divSearchMongo" role="tab" aria-controls="divSearchMongo" aria-selected="false"><h5>Search queries in Mongo</h5></a>
           </li>
+          <li class="nav-item">
+              <a class="nav-link" id="md-tab" data-toggle="tab" href="#divMetadata" role="tab" aria-controls="divMetadata" aria-selected="false"><h5>Metadata</h5></a>
+          </li>
+
         </ul>
 
 
@@ -157,6 +161,7 @@
               <div class="list-group" id="loadList"></div>
               <p></p>
           </div>
+
           <div class="tab-pane fade" id="divSearchMongo" role="tabpanel" aria-labelledby="search-tab">
                     <p></p>
                       <table>
@@ -206,6 +211,15 @@
 
 
           </div>
+
+          <div class="tab-pane fade" id="divMetadata" role="tabpanel" aria-labelledby="md-tab">
+              <p></p>
+              <button id="btnMetadataBack" type="button" class="btn btn-primary">Back to datasets</button>
+              <div id="domaintable"></div>
+              <p></p>
+              <pre id="metadatacontent"></pre>
+          </div>
+
         </div>
     </div>
 

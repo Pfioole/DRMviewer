@@ -131,9 +131,11 @@ var ViewModel = function () {
             //sqstring = JSON.stringify(self.sq);
             //alert(sqstring);
             $("#MasterDiv").removeClass('d-none'); //view the MasterDiv of the QueryBuilder
+
         }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
+        getMetadata(self.studypathText());
     }
 
     self.fetchLeftFields = function() {
@@ -694,12 +696,41 @@ function viewQueryFunction(result) {
     console.log(JSON.stringify("sq.selectedFields formed selected fields: " + viewModel.sq.selectedFields()));
 }
 
+function getMetadata(study_path) {
+   $.getJSON("/getMetadata", {
+        studyPath: study_path,
+    }).done(function (result, status, xhr) {
+        metadata = result;
+        drawMetadaTable(metadata);
+    }).fail(function (xhr, status, error) {
+        alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+    });
+}
+
+function drawMetadaTable(metadata){
+    _domain_table = '<table  class="table table-striped table-sm table-hover"><thead>' +
+        '<th>Domain</th><th>Rows</th><th>Columns</th><th>Encoding</th><th>SAS File Label</th><tbody>';
+    metadata.domains.forEach(function (item, index) {
+      _domain_table += "<tr><td><a href='#' class='domainselection' id='" + item + "'>" + item + "</a></td><td>" +
+          metadata[item].number_rows + "</td><td>" +
+          metadata[item].number_columns + "</td><td>" + metadata[item].file_encoding + "</td><td>" +
+          metadata[item].file_label + "</td></tr>";
+    });
+    _domain_table += "" + "</tbody></table>";
+    $("#domaintable").html(_domain_table);
+    _pretty = JSON.stringify(metadata, undefined, 4);
+    $("#metadatacontent").html(_pretty);
+}
+
+
+
 let data = {};  //declaration of object to be used for datatables content
 
 $(document).ready( function () {
 
     $(".joindivs").hide();
     $("#btnSingle").hide();
+    $("#btnMetadataBack").hide();
 
     $.getJSON("/fetchCDRpath", {
         //??: ??,
@@ -719,6 +750,20 @@ $(document).ready( function () {
          }).fail(function (xhr, status, error) {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
          });
+    })
+
+    $(document).on("click", ".domainselection", function() {
+        var _domain = $(this).attr("id");
+        _metadata_table = '<h3>' + _domain +' domain variables</h3>' +
+            '<table  class="table table-striped table-sm table-hover"><thead>' +
+            '<th>Name</th><th>Label</th><th>Column Width</th><tbody>';
+        metadata[_domain].column_names.forEach(function (item, index) {
+            _metadata_table += "<tr><td>" + item + "</td><td>" +
+              metadata[_domain]["column_labels"][index] + "</td><td>" +
+              metadata[_domain]["variable_storage_width"][item] + "</td></tr>";
+        })
+        $("#domaintable").html(_metadata_table);
+        $("#btnMetadataBack").show();
     })
 
     $('#openModal').on('hidden.bs.modal', function () {
@@ -742,6 +787,11 @@ $(document).ready( function () {
         viewModel.sq.joins.removeAll();
         viewModel.sq.selectedFields.removeAll();
         //viewModel.sq.datasets.length = 1; //remove all datasets except the leftFile
+    });
+
+     $("#btnMetadataBack").click(function(){
+        getMetadata(viewModel.studypathText());
+        $("#btnMetadataBack").hide();
     });
 
 } );
