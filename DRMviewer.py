@@ -222,8 +222,8 @@ def fetchfields():
     df_ds = load_dataframe(domain, studyPath)
     npcols = df_ds.columns.values
     cols = npcols.tolist()
-    if origin != "sort" :
-        cols.insert(0, "*")
+    # if origin != "sort" :
+    cols.insert(0, "*")
     fieldlistDict = {}
     fieldlistDict["fieldList"] = cols
     return jsonify(fieldlistDict)
@@ -236,7 +236,7 @@ def fetchQueryData():
     sqDict = json.loads(sqstring);
     leftDomain = sqDict["leftFile"]
     df_ds = load_dataframe(leftDomain, studyPath)
-    subset = sqDict["selectedFields"]
+    subset = [] #sqDict["selectedFields"]
     shortSubset = [x.split('.')[1] if x==x else None for x in subset]
     subset = shortSubset
     df_ds = df_ds[subset].head(5)
@@ -277,15 +277,26 @@ def fetchSQLdata3():
     leftDomain = datasets[0]
     if len(datasets) > 1 :
         rightDomain = datasets[1]
-    subset = sqDict["selectedFields"]
+    # subset = sqDict["selectedFields"]
+    subset = []
+    subset_as = {} #dictionary with as values, to apply at the end of the query
+    for bf in sqDict["bm"]:
+        if bf["showField"]:
+            subset.append(bf["usedField"])
+            if "as" in bf.keys():
+                if bf["as"] != "":
+                    subset_as[bf["usedField"]] = bf["as"]
     q = sqDict["SQLquery"]
-    subset = sqDict["selectedFields"]
-    q = sqDict["SQLquery"]
+#    subset = sqDict["selectedFields"]
+#    q = sqDict["SQLquery"]
     dataframes = []
 
-    print("Datasets:")
+    print("Datasets 295:")
     print(datasets)
-
+    print("Subset")
+    print(subset)
+    print("Subset as")
+    print(subset_as)
     #Load the full data from the different dataset files
     for i in range(len(datasets)):
         if i == 0:
@@ -320,9 +331,6 @@ def fetchSQLdata3():
     cols_out = []
     for domain in datasets:
         selectall = domain + ".*"
-        # print("selectall: " + selectall)
-        # print("cols in: ")
-        # print(cols_in)
         cols_out = []
         # print("cols_out at start of dataset:")
         # print(cols_out)
@@ -356,7 +364,20 @@ def fetchSQLdata3():
     print(cols_out)
 
     print(df_ds.columns)
-    df_ds.columns = cols_out
+
+    # Replacing the AS values
+    cols_as = []
+    for _colheader in cols_out:
+        if _colheader in subset_as.keys():
+            cols_as.append(subset_as[_colheader])
+        else:
+            cols_as.append(_colheader)
+
+    print("col as 376")
+    print(cols_as)
+
+    df_ds.columns = cols_as   #iso col_out
+    print('ds_df after cols_out')
     df_ds.head()
 
     # Datacleaning steps
@@ -380,11 +401,19 @@ def fetchSQLdata3():
     #    subset = sqDict["selectedFields"]
     cols = []
     coldefs = []
+    print("subset as")
+    print(subset_as)
+    print("cols out")
+    print(cols_out)
+    print("cols as")
+    print(cols_as)
     for columnnr in range(len(cols_out)):
         cols.append({})
-        cols[columnnr]["data"] = cols_out[columnnr]
+        #cols[columnnr]["data"] = cols_out[columnnr]
+        cols[columnnr]["data"] = cols_as[columnnr]
         coldefs.append({})
-        coldefs[columnnr]["title"] = cols_out[columnnr]
+        #coldefs[columnnr]["title"] = cols_out[columnnr]
+        coldefs[columnnr]["title"] = cols_as[columnnr]
         coldefs[columnnr]["targets"] = columnnr
     dict_sq["cols"] = cols
     dict_sq["coldefs"] = coldefs
@@ -400,7 +429,7 @@ def fetchSQLdata3():
     jsonTable = jsonTable.replace(findRight, replaceRight)
     # dict_sq["cols"] = cols
 
-    #print(jsonTable)
+    print(jsonTable)
 
     return jsonTable
 
@@ -468,20 +497,22 @@ def searchMongo():
     print(sqDict)
     search_Dict = {}
     if "name" in sqDict:
-        _name_substring = (sqDict["name"]) + ".*/"
-        #_searchTerm = '$regex: "\\/.*' + sqDict["name"] + '.*/i"'
-        name_substring = "/^" + sqDict["name"] + "$/i" # /^bar$/i
-        # query = {"$regex": '/.*' +_name_substring}
-        name_substring = sqDict["name"]
-        query = {"$regex":  name_substring}
-        search_Dict["name"] = query
+        if sqDict["name"] != "":
+            _name_substring = (sqDict["name"]) + ".*/"
+            #_searchTerm = '$regex: "\\/.*' + sqDict["name"] + '.*/i"'
+            name_substring = "/^" + sqDict["name"] + "$/i" # /^bar$/i
+            # query = {"$regex": '/.*' +_name_substring}
+            name_substring = sqDict["name"]
+            query = {"$regex":  name_substring}
+            search_Dict["name"] = query
     if sqDict["dataModel"]:
         if sqDict["dataModel"] != "":
             search_Dict["dataModel"] = sqDict["dataModel"]
     if "description" in sqDict:
-        name_substring = sqDict["description"]
-        query = {"$regex":  name_substring}
-        search_Dict["description"] = query
+        if sqDict["description"] != "":
+            name_substring = sqDict["description"]
+            query = {"$regex":  name_substring}
+            search_Dict["description"] = query
     if sqDict["scope"]:
         if sqDict["scope"] != "":
             search_Dict["scope"] = sqDict["scope"]
@@ -491,17 +522,23 @@ def searchMongo():
     if "author" in sqDict:
         if sqDict["author"] != "":
             search_Dict["author"] = sqDict["author"]
-    print(search_Dict)
-
+    #print(search_Dict)
+#
+#    search_Dict = {}
+#
     for row in db.find(search_Dict):
         strrow = (dumps(row))     #conversions to get clean JSON from Mongo BSON
+        #print("strrow")
+        #print(strrow)
         dictrow = (loads(strrow)) #conversions to get clean JSON from Mongo BSON
-#        print(type(dictrow))       #type is dict
-#        test_list.append(strrow)
+        #print(type(dictrow))       #type is dict
+        #print(dictrow)
+#       test_list.append(strrow)
         api_list.append(dictrow)
 #        oldapi_list.append(str(row))
 #    print(test_list)
-    print(api_list)
+#    print("********************RETURN FROM MONGO QUERY****************************")
+#    print(api_list)
 #    print(oldapi_list)
     #print(jsonify({'query_list': api_list}))
     #return jsonify({'query_list' : api_list})
@@ -546,7 +583,5 @@ def invalid_request(error):
 
 
 if __name__ == '__main__':
-    print("pre the function")
     create_mongodatabase()
-    print("post the function")
     app.run(host='0.0.0.0', debug=True)

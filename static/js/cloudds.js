@@ -29,8 +29,10 @@ function Sort(sortField, sortDirection) {
     self.sortDirection = ko.observable("");
 }
 
-function StudyQuery(name, description, scope, dataModel, status, author, SQLquery, selectedFields,  whereClause, sorts,
-                    sortFields, leftFile, rightFile, datasets, joins, limit, _id) {
+//function StudyQuery(name, description, scope, dataModel, status, author, SQLquery, selectedFields,  whereClause, sorts,
+//                    sortFields, leftFile, rightFile, datasets, joins, limit, _id, bm) {
+function StudyQuery(name, description, scope, dataModel, status, author, SQLquery,
+                    datasets, joins, limit, _id, bm) {
     var self = this;
     self.name = ko.observable("");
     self.description = ko.observable();
@@ -39,21 +41,24 @@ function StudyQuery(name, description, scope, dataModel, status, author, SQLquer
     self.status = ko.observable();
     self.author = ko.observable("");
     self.SQLquery = ko.observable("");
-    self.selectedFields = ko.observableArray();
-    self.whereClause = ko.observable("");
-    self.sorts = ko.observableArray();
-    self.sortFields = ko.observableArray();
-    self.leftFile = ko.observable();
-    self.rightFile = ko.observable();
+//    self.SQLquery2 = ko.observable("");
+//    self.selectedFields = ko.observableArray();
+//    self.whereClause = ko.observable("");
+//    self.sorts = ko.observableArray();
+//    self.sortFields = ko.observableArray();
+//    self.leftFile = ko.observable();
+//    self.rightFile = ko.observable();
     self.datasets = ko.observableArray();
     self.joins = ko.observableArray();
     self.limit = ko.observable(10000);
     self._id = {};
-
+    self.bm = ko.observableArray();
 }
 
-function InputQuery(name, description, scope, dataModel, SQLquery, selectedFields,  whereClause, sorts,
-                    sortFields, leftFile, rightFile, datasets, joins, limit, _id) {
+//function InputQuery(name, description, scope, dataModel, SQLquery, selectedFields,  whereClause, sorts,
+//                    sortFields, leftFile, rightFile, datasets, joins, limit, _id, bm) {
+function InputQuery(name, description, scope, dataModel, SQLquery,
+                    datasets, joins, limit, _id, bm) {
     var self = this;
     self.name = "";
     self.description = "";
@@ -62,17 +67,18 @@ function InputQuery(name, description, scope, dataModel, SQLquery, selectedField
     self.status = "";
     self.author = "";
     self.SQLquery = "";
-    self.selectedFields = [];
-    self.whereClause = "";
-    self.sorts = [];
-    self.sortFields = [];
-    self.leftFile = "";
-    self.rightFile = "";
+//    self.SQLquery2 = "";
+//    self.selectedFields = [];
+//    self.whereClause = "";
+//    self.sorts = [];
+//    self.sortFields = [];
+//    self.leftFile = "";
+//    self.rightFile = "";
     self.datasets = [];
     self.joins = [];
     self.limit = 10000;
     self._id = {};
-
+    self.bm = [];
 }
 
 function SearchQuery(name, description, scope, dataModel, author, status) {
@@ -83,6 +89,26 @@ function SearchQuery(name, description, scope, dataModel, author, status) {
     self.dataModel = ko.observable("");
     self.author = ko.observable("");
     self.status = ko.observable("");
+}
+
+function BuildMatrix(usedfields, showfields, as, groupings, sortings, filters) {
+    var self = this;
+    self.usedfields = ko.observableArray();
+    self.showfields = ko.observableArray();
+    self.as = ko.observableArray();
+    self.groupings = ko.observableArray();
+    self.sortings = ko.observableArray();
+    self.filters = ko.observableArray();
+}
+
+function BuildField(usedField, showField, as, grouping, sorting, filter) {
+    var self = this;
+    self.usedField = ko.observable();
+    self.showField = ko.observable();
+    self.as = ko.observable();
+    self.grouping = ko.observable();
+    self.sorting = ko.observable();
+    self.filter = ko.observable();
 }
 
 var ViewModel = function () {
@@ -97,7 +123,7 @@ var ViewModel = function () {
     self.leftField = ko.observable();
     self.rightField = ko.observable();
     self.joinTypes = ["INNER JOIN", "OUTER JOIN", "LEFT JOIN"];
-    self.sortDirections = ["ASC", "DESC"];
+    self.sortDirections = ["", "ASC", "DESC"];
     self.sortDomain = ko.observable();
     self.sortField = ko.observable();
     self.sortFieldList = ko.observableArray();
@@ -109,13 +135,16 @@ var ViewModel = function () {
     self.leftLinkFieldList = ko.observableArray();
     self.rightLinkFieldList = ko.observableArray();
     self.sq = new StudyQuery("","",  "", "","", [,],
-         "", [],[],"" , "" , [], [],
-        [], [], 10000);
+         "", [],[],"" , "" , []);
     self.searchQuery = new SearchQuery("", "", "", "", "", "");
     self.dataModels = ["", "SDTM", "DRM", "Other"];
     self.statuses = ["", "Personal", "Development", "In Test", "Approved"];
     self.scopes = ["", "Global", "Neurosciences", "Oncology", "Immunology", "CVM", "IDV", "PHA"];
     self.query_list = ko.observableArray([]);
+
+    self.booleantest = ko.observable(false);
+    //self.bm = new BuildMatrix( [], [], [], [], []);
+    self.bm = ko.observableArray([]);
 
     // Operations
     self.fetchDatasets = function() {
@@ -149,8 +178,9 @@ var ViewModel = function () {
  //           }
             self.links.removeAll();
             self.leftFieldList(lijst);
-            self.sq.sorts.removeAll();
-            self.sq.selectedFields.removeAll();
+//            self.sq.sorts.removeAll();
+            // 21-5 self.sq.selectedFields.removeAll();
+            self.sq.bm.removeAll();
             if (self.sq.datasets().length < 1) {
                 self.sq.datasets.push(self.leftFile());
             } else {
@@ -174,9 +204,10 @@ var ViewModel = function () {
             lijst = result.fieldList;
             self.rightFieldList(lijst);
             self.links.removeAll();
-            self.sq.sortFields.removeAll();
-            self.sq.sorts.removeAll();
-            self.sq.selectedFields.removeAll();
+//            self.sq.sortFields.removeAll()
+//            self.sq.sorts.removeAll();
+            // 21-5 self.sq.selectedFields.removeAll();
+            self.sq.bm.removeAll();
             if (self.sq.datasets().length < 2) {
                 self.sq.datasets.push(self.rightFile());
             } else {
@@ -236,6 +267,7 @@ var ViewModel = function () {
         });
     }
 
+/*
     self.fetchSortFields = function() {
         $.getJSON("/fetchfields", {
             studyPath: self.studypathText(),
@@ -248,6 +280,7 @@ var ViewModel = function () {
             alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
         });
     }
+*/
 
     self.addLink = function() {
         self.links.push(new Link("", ""));
@@ -267,27 +300,42 @@ var ViewModel = function () {
         return this.leftFile() + " " + this.leftField();
     }, this);
 
+/*
     self.addSort = function() {
         self.sq.sortFields.push(new Sort("", ""));
     };
+*/
 
     self.addOrderBy = function() {
-        self.sq.sorts.push(self.sortDomain() + "." + self.sortField() + " " + self.sortDirection());
+//        self.sq.sorts.push(self.sortDomain() + "." + self.sortField() + " " + self.sortDirection());
     }
 
     self.addLeftFieldSelect = function() {
         //alert("selected: " + self.rightField());
-        domainField = self.leftFile() + "." + self.leftField();
-        self.sq.selectedFields.push(domainField);
+        _domainField = self.leftFile() + "." + self.leftField();
+        //sq
+        // 21-5 self.sq.selectedFields.push(_domainField);
+        //bf
+        bf = new BuildField( "",  true, "", "", "", "");
+        bf.usedField(_domainField);
+        bf.showField(true);
+        self.sq.bm.push(bf);
     }
 
     self.addRightFieldSelect = function() {
         //alert("selected: " + self.rightField());
-        domainField = self.rightFile() + "." + self.rightField();
-        self.sq.selectedFields.push(domainField);
+        _domainField = self.rightFile() + "." + self.rightField();
+        //sq
+        // 21-5 self.sq.selectedFields.push(_domainField);
+        //bf
+        bf = new BuildField( "",  true, "", "", "", "");
+        bf.usedField(_domainField);
+        bf.showField(true);
+        self.sq.bm.push(bf);
     }
 
-    self.buildSQLstring = function() {
+/*
+    self.buildSQLstringold = function() {
 
         // JOIN text
         joinLength = self.sq.joins().length;
@@ -357,9 +405,119 @@ var ViewModel = function () {
         console.log("BuildQuery sql query :"  + SQLquery);
         self.sq.SQLquery(SQLquery);
     }
+*/
+
+    self.buildSQLstring = function() {
+
+        //assumes _bm_length is > 0
+        _bm_length = self.sq.bm().length;
+
+        // JOIN text
+        joinLength = self.sq.joins().length;
+        if ((joinLength > 0) && (self.leftFile() !== self.rightFile())) {
+            self.createJoin();
+            linksLength = self.sq.joins()[0].links.length;
+            //alert("self.buildSQLstring linkslength: " + linksLength);
+
+            joinText = " " + self.sq.joins()[0].joinType + " " + self.sq.joins()[0].joinedRightDS + " ON (" +
+                self.sq.joins()[0].joinedLeftDS + "." + self.sq.joins()[0].links[0].leftLink() + " = "
+                + self.sq.joins()[0].joinedRightDS + "." + self.sq.joins()[0].links[0].rightLink();
+
+            if (linksLength > 1) {
+                for (i = 1; i < linksLength; i++) {
+                    joinText += ") AND (" + self.leftFile() + "." + self.sq.joins()[0].links[i].leftLink()
+                        + " = " + self.sq.joins()[0].joinedRightDS + "." + self.sq.joins()[0].links[i].rightLink();
+                }
+            }
+            joinText += ")";
+        } else {
+            joinText = "";
+        }
+        console.log("BuildQuery jointext :"  + joinText);
+
+        // Where clause
+        _subset_array = []
+        for (i=0; i < _bm_length; i++) {
+            if ((self.sq.bm()[i].filter() != null) && (self.sq.bm()[i].filter() != "")) {
+                _subset_array.push(self.sq.bm()[i].usedField() + " " + self.sq.bm()[i].filter());
+            }
+        }
+        if (_subset_array.length > 0) {
+            whereSQL = " WHERE (" + _subset_array[0]
+            if (_subset_array.length >1) {
+                for (i=1; i < _subset_array.length; i++){
+                    whereSQL += ") AND (" + _subset_array[i];
+                }
+            }
+            whereSQL += ")";
+        } else {
+            whereSQL = "";
+        }
+
+        //select fields
+        _subset_array = []
+        for (i=0; i < _bm_length; i++) {
+            if (self.sq.bm()[i].showField()) {
+                _entry = self.sq.bm()[i].usedField();
+                if ((self.sq.bm()[i].as() != null) && (self.sq.bm()[i].as() != "")) {
+                    _entry += " AS " + self.sq.bm()[i].as();
+                }
+                _subset_array.push(_entry);
+            }
+        }
+        selection = _subset_array.toString();
+        selection = selection.replace(/,/g, "\, ");  //add a blanks after comma for readability
+
+ /*
+        if (self.sq.selectedFields().length == 0) {
+            self.sq.selectedFields.push(self.leftFile() + ".*")
+        };
+        selection = self.sq.selectedFields().toString();
+        selection = selection.replace(/,/g, "\, ");  //in order to add a blank after each comma for readability
+
+        console.log("BuildQuery sql selection(fields) :"  + selection);
+*/
+
+        _subset_array = [];
+        for (i=0; i < _bm_length; i++) {
+            if ((self.sq.bm()[i].sorting() != null) && (self.sq.bm()[i].sorting() != "")) {
+                _entry = self.sq.bm()[i].usedField() + " " + self.sq.bm()[i].sorting();
+                _subset_array.push(_entry);
+            }
+        }
+        if (_subset_array.length == 0) {
+            sorting = "";
+        } else {
+            sorting = " ORDER BY " + _subset_array.toString();
+            sorting = sorting.replace(/,/g, "\, ");  //add a blanks after comma for readability
+        }
+        console.log("BuildQuery sql sorting2 : "  + sorting);
+ /*
+        if (typeof self.sq.sorts() != "undefined") {
+             if (self.sq.sorts().length != 0) {
+                orderBy = " ORDER BY " + self.sq.sorts().toString();
+                orderBy = orderBy.replace(/,/g, "\, ");  //in order to add a blank after each comma for readability
+            } else {
+                 orderBy = "";
+            }
+        } else {
+             orderBy = "";
+        }
+*/
+        if (self.sq.limit().length != 0) {
+            limit = " LIMIT " + self.sq.limit().toString();
+        } else {
+            limit = "";
+        }
+
+        SQLquery = "SELECT " + selection + " FROM " + self.leftFile() + joinText + whereSQL + sorting + limit + ";";
+        //self.SQLquery(SQLquery);
+        console.log("BuildQuery sql query 2 :"  + SQLquery);
+        self.sq.SQLquery(SQLquery);
+    }
 
     self.runQuery4 = function() {
-        self.buildSQLstring();
+        self.buildSQLstringold();
         //self.sq.selectedFields = self.selectedFields();
         //alert("JS sent selected fields : " + self.sq.selectedFields);
         sqstring = JSON.stringify(ko.toJS(self.sq));
@@ -396,8 +554,9 @@ var ViewModel = function () {
     }
 
     self.runSQLquery = function() {
-        console.log("sq.selectedFields at start of runSQLquery :" + self.sq.selectedFields());
+        // 21-5 console.log("sq.selectedFields at start of runSQLquery :" + self.sq.selectedFields());
         console.log("sq.SQLquery at start of runSQLquery :" + self.sq.SQLquery());
+        //self.buildSQLstringold();
         self.buildSQLstring();
         //self.sq.selectedFields = self.selectedFields();
         //alert("JS sent selected fields : " + self.sq.selectedFields);
@@ -442,6 +601,7 @@ var ViewModel = function () {
 
     self.saveQueryModal = function() {
         self.buildSQLstring();
+        //self.buildSQLstringold();
         $('#saveModal').modal('toggle');
     }
 
@@ -553,11 +713,17 @@ var ViewModel = function () {
         self.links.remove(link);
     }
 
-    self.removeSort = function(sort) {self.sq.sortFields.remove(sort)}
+//    self.removeSort = function(sort) {self.sq.sortFields.remove(sort)}
 
-    self.removeSort2 = function() { { self.sq.sorts.pop();} }
+//    self.removeSort2 = function() { { self.sq.sorts.pop();} }
 
-    self.removeSelectField = function() { { self.sq.selectedFields.pop();} }
+    self.removeSelectField = function() { {
+        //21-5 self.sq.selectedFields.pop();
+        } }
+
+    self.removeUsedField = function(field) {
+        self.sq.bm.remove(field);
+    }
 
     self.removeAllLinks = function() {    }
 
@@ -594,7 +760,7 @@ function deleteQueryFunction(mongoQuery) {
 }
 
 function viewQueryFunction(result) {
-    //alert("full data: " + JSON.stringify(result));
+    console.log("full data received: " + JSON.stringify(result));
     viewModel.sq.name(result.name);
     viewModel.sq.description(result.description);
     viewModel.sq.scope(result.scope);
@@ -613,6 +779,8 @@ function viewQueryFunction(result) {
     //viewModel.rightFile(result.rightFile);
     //viewModel.leftFile(result.leftFile);
     viewModel.sq.datasets(result.datasets);
+
+/*
     if (typeof result.whereClause != "undefined") {
         viewModel.sq.whereClause(result.whereClause);
     } else {
@@ -636,8 +804,8 @@ function viewQueryFunction(result) {
         alert (" sorts undefined ");
         viewModel.sq.sorts([]);
     }
-    //viewModel.sq.sorts(result.sorts);
 
+*/
     if (typeof result.joins != "undefined") {
         //alert( "SQ object before: " + viewModel.makeString(viewModel.sq));
         viewModel.sq.joins.removeAll();
@@ -669,6 +837,34 @@ function viewQueryFunction(result) {
         viewModel.sq.joins.removeAll();
         //alert("All joins removed as the joins object was undefined")
     }
+
+    if (typeof result.bm != "undefined") {
+        viewModel.sq.bm.removeAll();
+        for (var i = 0; i < result.bm.length; i++) {
+            console.log(result.bm[i].usedField);
+            _usedField = result.bm[i].usedField;
+            _showField = result.bm[i].showField;
+            _as = result.bm[i].as;
+            _grouping = result.bm[i]._grouping;
+            _sorting = result.bm[i].sorting;
+            _filter = result.bm[i].filter;
+            // bf = new BuildField(result.bm[i].usedField, result.bm[i].showField, result.bm[i].as, result.bm[i].grouping,
+           //     result.bm[i].sorting, result.bm.filter);
+
+            bf = new BuildField( "",true, "", "", "", "");
+            bf.usedField(result.bm[i].usedField);
+            bf.showField(result.bm[i].showField);
+            bf.as(result.bm[i].as);
+            bf.grouping(result.bm[i].grouping);
+            bf.sorting(result.bm[i].sorting);
+            bf.filter(result.bm[i].filter);
+
+            console.log(bf.usedField());
+            viewModel.sq.bm.push(bf);
+            console.log(viewModel.makeString(viewModel.sq));
+        }
+    }
+
     if (typeof result.limit != "undefined") {
         viewModel.sq.limit(result.limit);
     } else {
@@ -676,7 +872,7 @@ function viewQueryFunction(result) {
     }
     //alert( "SQ object at end: " + viewModel.makeString(viewModel.sq));
     viewModel.sq.SQLquery(result.SQLquery);
-    viewModel.sq.selectedFields(result.selectedFields);
+    // 21-5 viewModel.sq.selectedFields(result.selectedFields);
     //console.log("ViewQueryFunction sq.selectedFields : " + viewModel.sq.selectedFields());
 
     //Prepare the query edit view to fit either single table or joined tables
@@ -693,7 +889,7 @@ function viewQueryFunction(result) {
     }
     $('#openModal').modal('toggle');
     console.log(JSON.stringify("sq.SQLquery formed from load query: " + viewModel.sq.SQLquery()));
-    console.log(JSON.stringify("sq.selectedFields formed selected fields: " + viewModel.sq.selectedFields()));
+    // 21-5 console.log(JSON.stringify("sq.selectedFields formed selected fields: " + viewModel.sq.selectedFields()));
 }
 
 function getMetadata(study_path) {
@@ -785,7 +981,8 @@ $(document).ready( function () {
         $("#btnSingle").hide();
         viewModel.links.removeAll();
         viewModel.sq.joins.removeAll();
-        viewModel.sq.selectedFields.removeAll();
+        viewModel.sq.bm.removeAll();
+        // 21-5 viewModel.sq.selectedFields.removeAll();
         //viewModel.sq.datasets.length = 1; //remove all datasets except the leftFile
     });
 

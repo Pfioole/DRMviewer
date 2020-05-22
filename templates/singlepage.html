@@ -103,42 +103,81 @@
                         </div>
                     </div>
 
-                    <div class="container">
-                        <strong>Select</strong>
-                        <table class="table table-bordered table-sm">
-                            <tr><td>
-                                <span data-bind="text: sq.selectedFields" class="h6"></span> <a href="#" data-bind="click: $root.removeSelectField">X</a>
-                            </td></tr>
-                        </table>
-                    </div>
 
-                    <!-- WHERE CLAUSE -->
-                    <div class="container">
-                        <strong>Where: </strong><input class="form-control" data-bind="value: sq.whereClause" />
-                    </div>
 
-                    <!-- SORTING -->
-                    <div class="container">
-                        <strong>Order by: </strong>
-                        <select data-bind="options: sq.datasets, value: sortDomain, event:{change: fetchSortFields}" class="form-control-sm" ></select>
-                        <select data-bind="options: sortFieldList, value: sortField" class="form-control-sm" ></select>
-                        <select data-bind="options: $root.sortDirections, value: sortDirection" class="form-control-sm"></select>
-                        <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addOrderBy">Add</button>
-                        <h5><span data-bind="text: sq.sorts" class="h6"></span> <a href="#" data-bind="click: $root.removeSort2">X</a></h5>
-                        </br>
-                        </br>
-                    </div>
-
-                    <!-- ORDERBY LIST -->
-                    <div class="container">
-                        ORDER BY <span data-bind="text: sq.sorts" class="h6"></span> <a href="#" data-bind="click: $root.removeSort2">X</a>
-                    </div>
 
                     <!-- LIMIT -->
                     <div class="container">
                         <strong>Limit: </strong><input class="form-control" data-bind="value: sq.limit" />
                     </div>
+                    <p></p>
+                    <!-- MS Access interface for field selection -->
+                    <div class="container">
+                            <table style="display: inline-block;" width="80">
+                                <tr><td style="text-align:right;">field:</td></tr>
+                                <tr><td style="text-align:right; height: 25px;">show:</td></tr>
+                                <tr><td style="text-align:right; height: 30px;">as:</td></tr>
+                                <tr><td style="text-align:right; height: 40px;">sort:</td></tr>
+                                <tr><td style="text-align:right; height: 30px;">filter:</td></tr>
+                                <tr><td style="text-align:right">delete:</td></tr>
+                            </table>
+                            <table class="buildtable">
+                                <tbody>
+                                    <tr  data-bind="foreach: sq.bm">
+                                       <th data-bind="text: usedField" width="150" style="border: 1px dotted black;"></th>
+                                    </tr>
+                                    <tr  data-bind="foreach: sq.bm">
+                                       <td style="border: 1px dotted black;"><input type="checkbox" value="show" data-bind="checked: showField" /></td>
+                                    </tr>
+                                    <tr  data-bind="foreach: sq.bm">
+                                       <td style="border: 1px dotted black;" ><input data-bind="value: as"></td>
+                                    </tr>
+                                    <tr data-bind="foreach: sq.bm">
+                                       <td style="border: 1px dotted black;" ><select data-bind="options: $root.sortDirections, value: sorting" class="form-control input-sm"></select></td>
+                                    </tr>
+                                    <tr data-bind="foreach: sq.bm">
+                                       <td style="border: 1px dotted black;" ><input data-bind="value: filter"></td>
+                                    </tr>
+                                    <tr data-bind="foreach: sq.bm">
+                                        <td style="text-align:center"><a href="#" data-bind="click: $root.removeUsedField"><i class="fa fa-trash" aria-hidden="true"></i></a></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    <!--
+                    <div class="container">
+                        <strong>Select</strong>
+                        <table class="table table-bordered table-sm">
+                            <tr ><td>
+                                <span data-bind="text: sq.selectedFields" class="h6"></span> <a href="#" data-bind="click: $root.removeSelectField">X</a>
+                            </td></tr>
+                        </table>
+                    </div>
+                    -->
 
+                    <!-- WHERE CLAUSE -->
+                    <!--
+                    <div class="container">
+                        <strong>Where: </strong><input class="form-control" data-bind="value: sq.whereClause" />
+                    </div>
+                    -->
+
+                    <!-- SORTING -->
+                     <!-- <div class="container">
+                        <strong>Order by: </strong>
+                       <select data-bind="options: sq.datasets, value: sortDomain, event:{change: fetchSortFields}" class="form-control-sm" ></select>
+                        <select data-bind="options: sortFieldList, value: sortField" class="form-control-sm" ></select>
+                        <select data-bind="options: $root.sortDirections, value: sortDirection" class="form-control-sm"></select>
+                        <button type="button" class="btn btn-outline-primary btn-sm" data-bind="click: addOrderBy">Add</button>
+                        <h5><span data-bind="text: sq.sorts" class="h6"></span> <a href="#" data-bind="click: $root.removeSort2">X</a></h5>
+                    </div> -->
+
+                    <!-- ORDERBY LIST -->
+                    <!--
+                    <div class="container">
+                        ORDER BY <span data-bind="text: sq.sorts" class="h6"></span> <a href="#" data-bind="click: $root.removeSort2">X</a>
+                    </div> -->
+-->
 
                 <!-- end of QueryBuilderDiv -->
                 </div>
@@ -151,6 +190,9 @@
                     <button class="btn btn-primary" data-bind="click: saveQueryModal">Save query</button>
                 </div>
                 <p></p>
+
+
+
 
 
           </div>
