@@ -320,8 +320,12 @@ def fetchSQLdata3():
         print(dfname)
         q = pandaSQLcleanquery(q, datasets[i], dfname)
     print(q)
-
-    df_ds = psql.sqldf(q, locals())
+    try:
+        df_ds = psql.sqldf(q, locals())
+    except Exception as err:
+        print('Something went wrong: ', str(err))
+        _error_message = {"ERROR" : str(err)}
+        return jsonify(_error_message)
     print("Joined dataframe df_ds:")
     print(df_ds.head())
 
