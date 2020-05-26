@@ -173,6 +173,18 @@ def fetchMetadata(_study_path):
             metadata[domain] = _domain_metadata
     metadata["domains"] = domains
     return(metadata)
+
+def getColumnFrequency(_study_path, domain, field):
+    if (_study_path[-1:] not in ["/", "\\"]):
+        _study_path = _study_path + "/"
+    _file_folder = _study_path + domain + ".sas7bdat"
+    df, meta = pyreadstat.read_sas7bdat(_file_folder)
+    _freq_dict = {"a":"b"}
+    print(df.dtypes[field])
+    if isinstance(field, str):
+        _freq_dict = df[field].value_counts().to_dict()
+    print(_freq_dict)
+    return (_freq_dict)
 ####################################################################################################
 
 @app.route('/')
@@ -196,6 +208,15 @@ def fetchCDRpath():
 def getMetadata():
     studyPath = request.args.get('studyPath')
     return jsonify(fetchMetadata(studyPath))
+
+@app.route('/columnFrequency', methods=['GET'])
+def columnFrequency():
+    studyPath = request.args.get('studyPath')
+    domain = request.args.get('domain')
+    field = request.args.get('field')
+    _freqJSON = jsonify(getColumnFrequency(studyPath, domain, field))
+    return _freqJSON
+
 
 @app.route('/fetchdatasets', methods=['GET'])
 def fetchdatasets():
@@ -485,6 +506,28 @@ def fetchQueries():
     filelistDict = {}
     filelistDict["queryList"] = filelist
     return jsonify(filelistDict)
+
+@app.route('/Mongo_query', methods=['GET'])
+def getMongoQuery():
+    api_list = []
+    test_list = []
+    oldapi_list = []
+    db = connection.cloudds.queries
+
+    #searchString = request.args.get('searchString')
+    _name = request.args.get('name')
+    print("_name")
+    print(_name)
+    search_Dict = {}
+    if _name != "":
+        search_Dict["name"] = _name
+        print("search_Dict:")
+        print(search_Dict)
+        result = db.find_one(search_Dict)
+    else:
+        return Response(dumps({}, default=json_util.default), mimetype='application/json')
+    return Response(dumps(result, default=json_util.default), mimetype='application/json')
+
 
 
 @app.route('/searchMongo', methods=['GET'])
