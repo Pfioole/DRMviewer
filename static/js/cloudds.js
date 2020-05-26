@@ -494,6 +494,20 @@ var ViewModel = function () {
         });
     }
 
+    self.getMongoJSONstring = function() {
+        let searchString = JSON.stringify(ko.toJS(self.searchQuery));
+        $.getJSON("/Mongo_query", {
+
+            searchString: searchString //{"test":"test"},
+        }).done(function (result, status, xhr) {
+            alert("JS received data: " + JSON.stringify(result));
+            console.log(JSON.stringify(result));
+
+        }).fail(function (xhr, status, error) {
+            alert("Error retrieving AJAX data: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+        });
+    }
+
     self.clearMongoFilter = function() {
         self.searchQuery.name("");
         self.searchQuery.description("");
@@ -535,7 +549,9 @@ var ViewModel = function () {
     }
 
     self.viewJSONmodal = function(mongoQuery) {
+        _JSONlink = http_path +  "/Mongo_query?name=" + mongoQuery.name;
         _pretty = JSON.stringify(mongoQuery, undefined, 4)
+        $("#JSONlink").html(_JSONlink);
         $("#JSONprettyPrint").html(_pretty);
         $('#prettyPrintModal').modal('toggle');
     }
@@ -692,18 +708,21 @@ function drawMetadaTable(metadata){
     _domain_table = '<table  class="table table-striped table-sm table-hover"><thead>' +
         '<th>Domain</th><th>Rows</th><th>Columns</th><th>Encoding</th><th>SAS File Label</th><tbody>';
     metadata.domains.forEach(function (item, index) {
-      _domain_table += "<tr><td><a href='#' class='domainselection' id='" + item + "'>" + item + "</a></td><td>" +
+      _domain_table += "<tr><td>" + item + "</td><td>" +
           metadata[item].number_rows + "</td><td>" +
-          metadata[item].number_columns + "</td><td>" + metadata[item].file_encoding + "</td><td>" +
+          "<a href='#' class='domainselection' id='" + item + "'>" +
+          metadata[item].number_columns + "</a></td><td>" + metadata[item].file_encoding + "</td><td>" +
           metadata[item].file_label + "</td></tr>";
     });
     _domain_table += "" + "</tbody></table>";
     $("#domaintable").html(_domain_table);
     _pretty = JSON.stringify(metadata, undefined, 4);
-    $("#metadatacontent").html(_pretty);
+    //$("#metadatacontent").html(_pretty);
 }
 
 let data = {};  //declaration of object to be used for datatables content
+
+var http_path;
 
 $(document).ready( function () {
 
@@ -715,6 +734,7 @@ $(document).ready( function () {
         //??: ??,
     }).done(function (result, status, xhr) {
         viewModel.studypathText(result.CDRpath);
+        http_path = result.http_path;
     }).fail(function (xhr, status, error) {
         alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
     });
@@ -737,13 +757,44 @@ $(document).ready( function () {
             '<table  class="table table-striped table-sm table-hover"><thead>' +
             '<th>Name</th><th>Label</th><th>Column Width</th><tbody>';
         metadata[_domain].column_names.forEach(function (item, index) {
-            _metadata_table += "<tr><td>" + item + "</td><td>" +
+            _metadata_table += "<tr><td><a href='#' class='fieldrowselection' id='" + _domain + "." + item + "'>" +
+                item + "</a></td><td>" +
               metadata[_domain]["column_labels"][index] + "</td><td>" +
               metadata[_domain]["variable_storage_width"][item] + "</td></tr>";
         })
+        _metadata_table +=  "</tbody></table>";
         $("#domaintable").html(_metadata_table);
         $("#btnMetadataBack").show();
     })
+
+    $(document).on("click", ".fieldrowselection", function() {
+        var _full_field = $(this).attr("id");
+        var _domain = _full_field.split(".")[0];
+        var _field = _full_field.split(".")[1];
+
+        $.getJSON("/columnFrequency", {
+            studyPath: viewModel.studypathText(),
+            domain: _domain,
+            field: _field
+         }).done(function (result, status, xhr) {
+                _metadata_table = '<h3>' + _field +' frequencies from ' + _domain + ' in study ' + viewModel.studypathText() + '</h3>' +
+                    '<table  class="table table-striped table-sm table-hover"><thead>' +
+                    '<th>Field</th><th>Observations</th><tbody>';
+                    for (let [key, value] of Object.entries(result)) {
+                        _metadata_table += "<tr><td>" + key + "</td><td>" + value + "</td></tr>";
+                    }
+                _metadata_table +=  "</tbody></table>";
+                $("#domaintable").html(_metadata_table);
+                $("#btnMetadataBack").show();
+
+         }).fail(function (xhr, status, error) {
+            alert("Result: " + status + " " + error + " " + xhr.status + " " + xhr.statusText)
+         });
+
+
+    })
+
+
 
     $('#openModal').on('hidden.bs.modal', function () {
             viewModel.adapt_domain_field_list(viewModel.leftFile(), "left");
