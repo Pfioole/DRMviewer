@@ -180,12 +180,19 @@ def getColumnFrequency(_study_path, domain, field):
     if (_study_path[-1:] not in ["/", "\\"]):
         _study_path = _study_path + "/"
     _file_folder = _study_path + domain + ".sas7bdat"
-    df, meta = pyreadstat.read_sas7bdat(_file_folder)
-    _freq_dict = {"a":"b"}
-    print(df.dtypes[field])
-    if isinstance(field, str):
-        _freq_dict = df[field].value_counts().to_dict()
-    print(_freq_dict)
+
+    try:
+        df, meta = pyreadstat.read_sas7bdat(_file_folder)
+        #df_ds = psql.sqldf(q, locals())
+        print(df.dtypes[field])
+        if isinstance(field, str):
+            _freq_dict = df[field].value_counts().to_dict()
+        else: _freq_dict = {"ERROR": "Selected value is not a string"}
+        print(_freq_dict)
+    except Exception as err:
+        print('Something went wrong: ', str(err))
+        # _error_message = {"ERROR" : str(err)}
+        _freq_dict = {"ERROR": str(err)}
     return (_freq_dict)
 ####################################################################################################
 
