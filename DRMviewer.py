@@ -177,12 +177,12 @@ def fetchMetadata(_study_path):
     return(metadata)
 
 def getColumnFrequency(_study_path, domain, field):
-    if (_study_path[-1:] not in ["/", "\\"]):
-        _study_path = _study_path + "/"
-    _file_folder = _study_path + domain + ".sas7bdat"
-
+    # if (_study_path[-1:] not in ["/", "\\"]):
+    #    _study_path = _study_path + "/"
+    # _file_folder = _study_path + domain + ".sas7bdat"
     try:
-        df, meta = pyreadstat.read_sas7bdat(_file_folder)
+        df = load_dataframe(domain, _study_path)
+        # df, meta = pyreadstat.read_sas7bdat(_file_folder)
         #df_ds = psql.sqldf(q, locals())
         print(df.dtypes[field])
         if isinstance(field, str):
