@@ -160,6 +160,8 @@ def fetchMetadata(_study_path):
             domain = os.path.splitext(_filename)[0].upper()
             domains.append(domain)
             _file_folder = _study_path + _filename
+            print("File path to retrieve dataset for frequency:")
+            print(_file_folder)
             df, meta = pyreadstat.read_sas7bdat(_file_folder, metadataonly=True)
             _domain_metadata = {}
             _domain_metadata["column_names"] = meta.column_names
