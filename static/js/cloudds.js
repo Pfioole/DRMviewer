@@ -116,7 +116,7 @@ var ViewModel = function () {
     self.leftLinkFieldList = ko.observableArray();
     self.rightLinkFieldList = ko.observableArray();
     self.sq = new StudyQuery("","",  "", "","", [,],
-         "", [],[],"" , "" , []);
+         "", [],[],"" , {} , []);
     self.searchQuery = new SearchQuery("", "", "", "", "", "");
     self.dataModels = ["", "SDTM", "DRM", "Other"];
     self.statuses = ["", "Personal", "Development", "In Test", "Approved"];
@@ -398,6 +398,7 @@ var ViewModel = function () {
             sqstring: sqstring
         }, function(data, status, xhr) {
             if (typeof data.ERROR == "undefined") {
+                /*
                 if (qTable !== null) {
                     qTable.destroy();
                     qTable = null;
@@ -412,6 +413,15 @@ var ViewModel = function () {
                     data: data.data,
                     columnDefs: data.coldefs
                 });
+                */
+                queryname = self.sq.name();
+
+                //create the corresponding input query object for later use
+                if (typeof self.sq._id == "undefined") {
+                    self.sq._id({});
+                }
+
+                showTable(data.cols, data.data, data.coldefs, self.sq);
 
                 //            viewModel.adapt_domain_field_list(self.leftFile(), "left");
                 //            viewModel.adapt_domain_field_list(self.rightFile(), "right");
@@ -431,6 +441,12 @@ var ViewModel = function () {
         $("#QueryBuilderDiv").removeClass('d-none');
         $("#btnEditQuery").addClass('d-none');
         $("#btnRunQuery").removeClass('d-none');
+        self.sq.name("");
+        self.sq.description("");
+        self.sq.scope("");
+        self.sq.dataModel("");
+        self.sq.status("");
+        self.sq.author("");
     }
 
     self.saveQueryModal = function() {
@@ -721,14 +737,72 @@ function drawMetadaTable(metadata){
 }
 
 let data = {};  //declaration of object to be used for datatables content
-
+var tabcounter = 4; //must be 1 less the fixed amount of tabs
 var http_path;
+
+
+function showTable(cols, data, coldefs, studyQuery){
+
+    var nextTab = tabcounter - 3;
+    tabcounter +=1;
+
+    //addTabQuery(self.sq, nextTab);
+    //inputQuery2 = new InputQuery( studyQuery.name(), )
+    _name= studyQuery.name();
+
+    _inputQuery = JSON.parse(JSON.stringify(ko.toJS(studyQuery)));
+    /*
+    _inputQuery = new InputQuery(_name, studyQuery.description(), studyQuery.scope(),
+            studyQuery.dataModel(), studyQuery.SQLquery(), studyQuery.datasets(), studyQuery.joins(),
+           studyQuery.limit(), studyQuery._id, studyQuery.bm());
+
+    _inputQuery.name = studyQuery.name();
+    _inputQuery.datasets = studyQuery.datasets();
+    */
+    if (_inputQuery.name.length == 0) {
+        _queryname = "view" + nextTab;
+    } else {
+        _queryname = _inputQuery.name;
+    }
+
+    console.log("input query: " + JSON.stringify(_inputQuery));
+    console.log("sq originally: " + JSON.stringify(ko.toJS(studyQuery)));
+    console.log("query name as in sq: " + studyQuery.name());
+    console.log("queryname used from sq: " + _queryname);
+    console.log("name from inputquery: " + _inputQuery.name);
+
+    arrTabInputQueries[nextTab] = _inputQuery;
+
+    // create the tab
+
+    $('<li class="nav-item" id="nav_item' + nextTab + '"><a class="nav-link" id="tab"' + nextTab +
+        ' href="#tab'+nextTab+'" data-toggle="tab"' + ' role="tab"><h5><i class="fa fa-window-close close_tab" ' +
+        'id="close_tab'+ nextTab + '" aria-hidden="true"></i> ' + _queryname +'</h5></a></li>').appendTo('#navTabs');
+
+    tab_content = '<table id="queryTable' + nextTab + '" class="display table-sm"><thead id="queryTableHead' + nextTab +
+        '"></thead></table>';
+
+    // create the tab content
+    $('<div class="tab-pane" id="tab'+nextTab+'">' + tab_content + '</div>').appendTo('.tab-content');
+
+    current_table_id = "#queryTable" + nextTab;
+    pTable = $(document).find(current_table_id).DataTable({
+        columns: cols,
+        data: data,
+        columnDefs: coldefs
+    });
+
+    // make the new tab active
+    $('#navTabs a:last').tab('show');
+
+};
 
 $(document).ready( function () {
 
     $(".joindivs").hide();
     $("#btnSingle").hide();
     $("#btnMetadataBack").hide();
+    arrTabInputQueries = [];
 
     $.getJSON("/fetchCDRpath", {
         //??: ??,
@@ -794,7 +868,18 @@ $(document).ready( function () {
 
     })
 
-
+    $(document).on("click", ".close_tab", function() {
+        icon_nr = $(this).attr("id").substring(9);
+        //currentDataTableDiv = "#DataTableDiv" + icon_nr;
+        currentTab = "tab" + icon_nr;
+        current_nav_item =  "#nav_item" + icon_nr;
+        //$(currentDataTableDiv).remove();
+        $(currentTab).remove();
+        $(current_nav_item).remove();
+            // make the last tab active
+        $('#navTabs a:last').tab('show');
+        //$('#navTabsContent a:last').tab('show');
+    })
 
     $('#openModal').on('hidden.bs.modal', function () {
             viewModel.adapt_domain_field_list(viewModel.leftFile(), "left");
@@ -822,6 +907,17 @@ $(document).ready( function () {
         getMetadata(viewModel.studypathText());
         $("#btnMetadataBack").hide();
     });
+  /*
+    function addTabQuery(studyQuery) {
+        inputQuery = new InputQuery(studyQuery.name(), studyQuery.description(), studyQuery.scope(),
+            studyQuery.dataModel(), studyQuery.SQLquery(), studyQuery.datasets(), studyQuery.joins(),
+           studyQuery.limit(), studyQuery._id, studyQuery.sq.bm());
+    }
+  */
+
+
+
+
 
 } );
 

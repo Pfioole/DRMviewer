@@ -183,7 +183,6 @@ def getColumnFrequency(_study_path, domain, field):
     try:
         df = load_dataframe(domain, _study_path)
         # df, meta = pyreadstat.read_sas7bdat(_file_folder)
-        #df_ds = psql.sqldf(q, locals())
         print(df.dtypes[field])
         if isinstance(field, str):
             _freq_dict = df[field].value_counts().to_dict()
@@ -195,7 +194,6 @@ def getColumnFrequency(_study_path, domain, field):
         _freq_dict = {"ERROR": str(err)}
     return (_freq_dict)
 ####################################################################################################
-
 @app.route('/')
 @app.route('/singlepage')
 def singlepage() -> 'html':
